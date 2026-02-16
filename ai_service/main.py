@@ -53,6 +53,9 @@ async def stream_frames():
 
     cap = open_camera(CAMERA_SOURCE)
     
+    # State for tracking violation persistence
+    is_violation_active = False
+
     # Retry connection loop
     while True:
         try:
@@ -81,40 +84,56 @@ async def stream_frames():
                     # Detection
                     annotated_frame = frame
                     detections = []
+                    current_frame_has_violation = False
+                    violation_data = None
+
                     if detector:
                         try:
                             detections, annotated_frame = detector.detect(frame)
                             
-                            # Check for violations and send alert
+                            # Check for violations
                             for d in detections:
                                 if d.get("status") == "violation":
-                                    # Violation: Loud Alarm
-                                    # Use a separate thread to play beep so it doesn't block video
-                                    import threading
-                                    import winsound
-                                    
-                                    def play_alarm():
-                                        try:
-                                            # 1000 Hz, 500 ms
-                                            winsound.Beep(1000, 500)
-                                        except Exception:
-                                            pass
-
-                                    # Only play if not already playing (basic check, or just fire-and-forget)
-                                    # Fire-and-forget thread
-                                    threading.Thread(target=play_alarm, daemon=True).start()
-
-                                    alert_data = {
-                                        "camera_id": "01", # Hardcoded for now
-                                        "alert_type": "PPE Violation",
-                                        "message": f"Detected: {d['label']}",
-                                        "severity": "high"
-                                    }
-                                    # send_alert(alert_data) # Blocking call, might slow down stream. Better async.
-                                    asyncio.create_task(send_alert_async(alert_data))
-                                    break # Only one alert per frame to avoid spam
+                                    current_frame_has_violation = True
+                                    violation_data = d
+                                    break # Found a violation, that's enough for status
                         except Exception as e:
                             print(f"Detection failed: {e}")
+
+                    # Logic: Play alert ONLY on rising edge (False -> True)
+                    # "OFF THE ALERT SOUND AFTER ONE BEEP IF NO VIOLATION IS SEEN"
+                    if current_frame_has_violation:
+                        if not is_violation_active:
+                            # Rising Edge: New violation episode detected
+                            print("Violation detected! Triggering alert.")
+                            is_violation_active = True
+                            
+                            # Play beep async (Once)
+                            import threading
+                            import winsound
+                            
+                            def play_alarm():
+                                try:
+                                    # 1000 Hz, 500 ms
+                                    winsound.Beep(1000, 500)
+                                except Exception:
+                                    pass
+                            
+                            threading.Thread(target=play_alarm, daemon=True).start()
+
+                            # Send Alert
+                            alert_payload = {
+                                "camera_id": "01",
+                                "alert_type": "PPE Violation",
+                                "message": f"Detected: {violation_data['label']}",
+                                "severity": "high"
+                            }
+                            asyncio.create_task(send_alert_async(alert_payload))
+                    else:
+                        # Falling Edge: Violation cleared
+                        if is_violation_active:
+                            print("Violation cleared. Resetting alert state.")
+                            is_violation_active = False
 
                     # Encode frame to JPEG
                     options = [int(cv2.IMWRITE_JPEG_QUALITY), 70] # Lower quality for speed
