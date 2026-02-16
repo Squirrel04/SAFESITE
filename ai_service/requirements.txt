@@ -1,0 +1,8 @@
+ultralytics
+opencv-python
+requests
+numpy
+python-dotenv
+labelImg
+websockets
+aiohttp
