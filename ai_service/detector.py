@@ -23,8 +23,22 @@ class PPE_Detector:
                 xyxy = box.xyxy[0].tolist()
                 label = self.classes[cls_id]
                 
-                if conf > 0.5:
+                if conf > 0.45: # Lower base threshold
                     if label == 'person':
+                        # Filter 1: Moderate Confidence Threshold for Person
+                        if conf < 0.50:
+                            continue
+
+                        # Filter 2: Aspect Ratio Filter
+                        # Relaxed: Allow width up to 1.2x height (bending over, carrying things)
+                        x1, y1, x2, y2 = map(int, xyxy)
+                        w = x2 - x1
+                        h = y2 - y1
+                        
+                        # If width is excessively wide compared to height, skip it.
+                        if w > h * 1.5: 
+                            continue
+
                         # Heuristic: Check for hard hat (yellow/white) in top region of box
                         has_helmet = self.check_ppe(frame, box, xyxy)
                         if has_helmet:

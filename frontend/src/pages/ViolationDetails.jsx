@@ -123,12 +123,19 @@ const ViolationDetails = () => {
                             <span className="text-xs font-mono text-gray-400">CAM_ID: {violation.camera_id}</span>
                         </div>
                         <div className="aspect-video bg-gray-900 relative flex items-center justify-center group">
-                            {/* Placeholder for snapshot */}
-                            <div className="text-center">
-                                <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4 opacity-50" />
-                                <p className="text-gray-400 font-medium">Snapshot Evidence</p>
-                                <p className="text-gray-600 text-sm">Frame captured at {new Date(violation.timestamp).toLocaleTimeString()}</p>
-                            </div>
+                            {violation.image_url ? (
+                                <img
+                                    src={violation.image_url}
+                                    alt="Evidence Snapshot"
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <div className="text-center">
+                                    <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4 opacity-50" />
+                                    <p className="text-gray-400 font-medium">Snapshot Evidence Unavailable</p>
+                                    <p className="text-gray-600 text-sm">Frame captured at {new Date(violation.timestamp).toLocaleTimeString()}</p>
+                                </div>
+                            )}
 
                             {/* Overlay Details */}
                             <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">

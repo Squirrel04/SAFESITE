@@ -121,12 +121,19 @@ async def stream_frames():
                             
                             threading.Thread(target=play_alarm, daemon=True).start()
 
+                            # Encode frame to Base64 for storage
+                            import base64
+                            _, buffer = cv2.imencode('.jpg', annotated_frame)
+                            jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+                            base64_image = f"data:image/jpeg;base64,{jpg_as_text}"
+
                             # Send Alert
                             alert_payload = {
                                 "camera_id": "01",
                                 "alert_type": "PPE Violation",
                                 "message": f"Detected: {violation_data['label']}",
-                                "severity": "high"
+                                "severity": "high",
+                                "image_url": base64_image
                             }
                             asyncio.create_task(send_alert_async(alert_payload))
                     else:

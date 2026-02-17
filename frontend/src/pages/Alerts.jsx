@@ -149,9 +149,19 @@ const Alerts = () => {
                             </div>
                             <div className="p-6">
                                 <div className="aspect-video bg-slate-950 rounded-xl border border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 relative overflow-hidden group">
-                                    <Camera className="w-12 h-12 mb-2 opacity-50" />
-                                    <p>Snapshot Unavailable</p>
-                                    <p className="text-xs">(Storage not connected)</p>
+                                    {selectedAlert.image_url ? (
+                                        <img
+                                            src={selectedAlert.image_url}
+                                            alt="Evidence"
+                                            className="w-full h-full object-contain"
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-slate-500">
+                                            <Camera className="w-12 h-12 mb-2 opacity-50" />
+                                            <p>Snapshot Unavailable</p>
+                                            <p className="text-xs">(Storage not connected)</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="mt-6 grid grid-cols-2 gap-4">
                                     <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
