@@ -4,8 +4,14 @@ from schemas.camera import Camera, CameraCreate
 from schemas.user import User
 from api.auth import get_current_user
 from core.database import db
+from api.websocket import manager
 
 router = APIRouter()
+
+@router.get("/{camera_id}/status")
+async def get_camera_status(camera_id: str):
+    connected_clients = len(manager.client_connections.get(camera_id, []))
+    return {"active": connected_clients > 0}
 
 @router.get("/", response_model=List[Camera])
 async def get_cameras(current_user: User = Depends(get_current_user)):

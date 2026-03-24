@@ -38,6 +38,7 @@ def open_camera(source):
 import asyncio
 import websockets
 import json
+import aiohttp
 
 BACKEND_WS_URL = os.getenv("BACKEND_WS_URL", "ws://localhost:8000/ws/stream/upload/01") # Default cam ID 01
 
@@ -61,7 +62,9 @@ async def stream_frames():
         try:
             async with websockets.connect(BACKEND_WS_URL) as websocket:
                 print(f"Connected to backend at {BACKEND_WS_URL}")
-                
+                last_status_check = 0
+                is_active = False
+
                 while True:
                     if not cap or not cap.isOpened():
                          # Try to reopen or just break to restart outer loop
@@ -70,6 +73,27 @@ async def stream_frames():
                          if not cap:
                              await asyncio.sleep(5)
                              continue
+
+                    current_time = time.time()
+                    if current_time - last_status_check > 2.0:
+                        last_status_check = current_time
+                        try:
+                            camera_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
+                            async with aiohttp.ClientSession() as session:
+                                async with session.get(f"{BACKEND_URL}/cameras/{camera_id}/status") as resp:
+                                    if resp.status == 200:
+                                        status_data = await resp.json()
+                                        is_active = status_data.get("active", False)
+                        except Exception as e:
+                            print(f"Failed to check camera status: {e}")
+                            is_active = True
+
+                    if not is_active:
+                        if cap and cap.isOpened() and CAMERA_SOURCE.isdigit():
+                            cap.read()
+                        is_violation_active = False
+                        await asyncio.sleep(0.5)
+                        continue
 
                     ret, frame = cap.read()
                     if not ret:

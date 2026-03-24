@@ -29,10 +29,10 @@ const Alerts = () => {
 
     const getSeverityColor = (severity) => {
         switch (severity?.toLowerCase()) {
-            case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20 shadow-red-500/10';
-            case 'medium': return 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-orange-500/10';
-            case 'low': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20 shadow-yellow-500/10';
-            default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+            case 'high': return 'bg-rose-500/10 text-rose-400 border-rose-500/20 shadow-rose-500/10';
+            case 'medium': return 'bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-orange-500/10';
+            case 'low': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-yellow-500/10';
+            default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
         }
     };
 
@@ -42,14 +42,22 @@ const Alerts = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <h1 className="text-3xl font-bold text-gray-900">
-                    Evidence Log
-                </h1>
-                <p className="text-gray-500 mt-2">Historical record of safety violations and system alerts.</p>
+                <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-gradient-to-tr from-rose-500 to-orange-600 rounded-2xl shadow-[0_0_20px_rgba(244,63,94,0.3)] relative group w-14 h-14 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
+                        <AlertTriangle className="w-8 h-8 text-white relative z-10" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                            Evidence Log
+                        </h1>
+                        <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Historical record of safety violations and system alerts.</p>
+                    </div>
+                </div>
             </motion.div>
 
             <motion.div
-                className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm"
+                className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl overflow-hidden shadow-xl"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -57,7 +65,7 @@ const Alerts = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr className="bg-slate-800/50 border-b border-slate-700/50 text-slate-400 text-xs uppercase tracking-wider font-semibold">
                                 <th className="p-5">Status & Type</th>
                                 <th className="p-5">Description</th>
                                 <th className="p-5">Camera Source</th>
@@ -65,11 +73,11 @@ const Alerts = () => {
                                 <th className="p-5 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-slate-800/50">
                             {loading ? (
-                                <tr><td colSpan="5" className="p-8 text-center text-gray-500">Loading evidence...</td></tr>
+                                <tr><td colSpan="5" className="p-8 text-center text-slate-500 font-medium tracking-wide">Securely loading evidence...</td></tr>
                             ) : alerts.length === 0 ? (
-                                <tr><td colSpan="5" className="p-8 text-center text-gray-500">No violations recorded.</td></tr>
+                                <tr><td colSpan="5" className="p-8 text-center text-slate-500 font-medium tracking-wide">No violations recorded.</td></tr>
                             ) : (
                                 alerts.map((alert, index) => (
                                     <motion.tr
@@ -77,39 +85,42 @@ const Alerts = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="hover:bg-gray-50 transition-colors group"
+                                        className="hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                                        onClick={() => navigate(`/violation/${alert.id}`)}
                                     >
-                                        <td className="p-4">
+                                        <td className="p-5">
                                             <div className="flex items-center space-x-3">
-                                                <div className={`p-2 rounded-lg border shadow-sm ${getSeverityColor(alert.severity).replace('text-', 'bg-opacity-10 bg-')}`}>
-                                                    <AlertTriangle className={`w-4 h-4 ${getSeverityColor(alert.severity).split(' ').pop()}`} />
+                                                <div className={`p-2.5 rounded-xl border shadow-sm ${getSeverityColor(alert.severity).replace('text-', 'bg-opacity-10 bg-')}`}>
+                                                    <AlertTriangle className={`w-5 h-5 ${getSeverityColor(alert.severity).split(' ').pop()}`} />
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-gray-900 text-sm">{alert.alert_type}</p>
-                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${getSeverityColor(alert.severity)}`}>
+                                                    <p className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-white transition-colors">{alert.alert_type}</p>
+                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border mt-1 inline-block ${getSeverityColor(alert.severity)}`}>
                                                         {alert.severity}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-gray-600 font-medium text-sm">
+                                        <td className="p-5 text-slate-400 font-medium text-sm group-hover:text-slate-300 transition-colors">
                                             {alert.message}
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center text-gray-500 text-sm">
-                                                <Camera className="w-4 h-4 mr-2 text-cyan-600" />
-                                                <span className="group-hover:text-cyan-700 transition-colors text-gray-700">{alert.camera_id}</span>
+                                        <td className="p-5">
+                                            <div className="flex items-center text-slate-500 text-sm">
+                                                <Camera className="w-4 h-4 mr-2 text-cyan-500" />
+                                                <span className="group-hover:text-cyan-400 transition-colors font-mono tracking-wide">{alert.camera_id}</span>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-gray-500 text-sm font-mono">
-                                            {new Date(alert.timestamp).toLocaleString()}
+                                        <td className="p-5 text-slate-500 text-sm font-mono tracking-wider group-hover:text-slate-400 transition-colors">
+                                            {new Date(alert.timestamp).toLocaleString(undefined, {
+                                                month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                                            })}
                                         </td>
-                                        <td className="p-4 text-right">
+                                        <td className="p-5 text-right">
                                             <button
-                                                onClick={() => navigate(`/violation/${alert.id}`)}
-                                                className="px-3 py-1.5 bg-white hover:bg-cyan-50 hover:text-cyan-700 text-gray-600 text-xs font-medium rounded-lg transition-all border border-gray-200 hover:border-cyan-200 flex items-center ml-auto shadow-sm"
+                                                onClick={(e) => { e.stopPropagation(); navigate(`/violation/${alert.id}`); }}
+                                                className="px-4 py-2 bg-slate-800/80 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-400 text-xs font-bold uppercase tracking-wider rounded-xl transition-all border border-slate-700 hover:border-cyan-500/30 flex items-center ml-auto shadow-sm"
                                             >
-                                                <Eye className="w-3 h-3 mr-2" />
+                                                <Eye className="w-4 h-4 mr-2" />
                                                 View Report
                                             </button>
                                         </td>
@@ -120,64 +131,6 @@ const Alerts = () => {
                     </table>
                 </div>
             </motion.div>
-
-            {/* Evidence Modal */}
-            <AnimatePresence>
-                {selectedAlert && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedAlert(null)}
-                            className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white border border-gray-200 rounded-2xl w-full max-w-2xl overflow-hidden relative shadow-2xl z-10"
-                        >
-                            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900">Event Evidence</h2>
-                                    <p className="text-gray-500 text-sm">ID: {selectedAlert.id}</p>
-                                </div>
-                                <button onClick={() => setSelectedAlert(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                            <div className="p-6">
-                                <div className="aspect-video bg-slate-950 rounded-xl border border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 relative overflow-hidden group">
-                                    {selectedAlert.image_url ? (
-                                        <img
-                                            src={selectedAlert.image_url}
-                                            alt="Evidence"
-                                            className="w-full h-full object-contain"
-                                        />
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center text-slate-500">
-                                            <Camera className="w-12 h-12 mb-2 opacity-50" />
-                                            <p>Snapshot Unavailable</p>
-                                            <p className="text-xs">(Storage not connected)</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="mt-6 grid grid-cols-2 gap-4">
-                                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                        <p className="text-xs text-slate-500 uppercase font-bold mb-1">Violation Type</p>
-                                        <p className="text-gray-200">{selectedAlert.alert_type}</p>
-                                    </div>
-                                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                        <p className="text-xs text-slate-500 uppercase font-bold mb-1">Confirmed Time</p>
-                                        <p className="text-gray-200">{new Date(selectedAlert.timestamp).toLocaleString()}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

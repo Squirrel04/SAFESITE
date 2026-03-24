@@ -61,15 +61,16 @@ const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <div className="flex items-center space-x-3">
-                    <div className="p-3 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl shadow-lg shadow-cyan-500/20">
-                        <Shield className="w-8 h-8 text-white" />
+                <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative group">
+                        <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
+                        <Shield className="w-8 h-8 text-white relative z-10" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
                             Safety Monitor
                         </h1>
-                        <p className="text-gray-500 mt-1">Real-time surveillance and anomaly detection system.</p>
+                        <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Real-time surveillance and anomaly detection system.</p>
                     </div>
                 </div>
             </motion.div>
@@ -98,15 +99,15 @@ const Dashboard = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                 >
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                            <Camera className="w-5 h-5 mr-2 text-cyan-600" />
+                        <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
+                            <Camera className="w-5 h-5 mr-3 text-cyan-400" />
                             Live Feeds
                         </h2>
-                        <button className="text-sm text-cyan-600 hover:text-cyan-700 transition-colors font-medium">View All</button>
+                        <button className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors font-semibold tracking-wide uppercase">View All</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {cameras.map((cam) => (
-                            <div key={cam.id} className="bg-white p-1 rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div key={cam.id} className="bg-slate-900/40 backdrop-blur-xl p-1.5 rounded-3xl border border-slate-800 shadow-xl overflow-hidden hover:border-slate-700 transition-colors">
                                 <LiveCameraFeed {...cam} />
                             </div>
                         ))}
@@ -120,29 +121,39 @@ const Dashboard = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                    <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                        <Activity className="w-5 h-5 mr-2 text-violet-600" />
+                    <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
+                        <Activity className="w-5 h-5 mr-3 text-violet-400" />
                         Activity Trends
                     </h2>
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6 h-[400px] shadow-sm">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 h-[400px] shadow-xl relative overflow-hidden group">
+                        {/* Background glow for chart */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-violet-500/10 blur-[60px] rounded-full pointer-events-none group-hover:bg-violet-500/20 transition-all duration-700" />
+                        
+                        <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                             <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="colorDetections" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.2} />
+                                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
                                         <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="colorViolations" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
                                         <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                                <XAxis dataKey="time" stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                                <YAxis stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <XAxis dataKey="time" stroke="#475569" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} dy={10} />
+                                <YAxis stroke="#475569" tick={{ fill: '#94a3b8' }} axisLine={false} tickLine={false} dx={-10} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#1e293b', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                    itemStyle={{ color: '#1e293b' }}
+                                    contentStyle={{ 
+                                        backgroundColor: 'rgba(15, 23, 42, 0.8)', 
+                                        backdropFilter: 'blur(12px)',
+                                        borderColor: '#334155', 
+                                        borderRadius: '16px', 
+                                        color: '#f8fafc',
+                                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                                    }}
+                                    itemStyle={{ color: '#e2e8f0', fontWeight: '500' }}
                                 />
                                 <Area type="monotone" dataKey="detections" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorDetections)" />
                                 <Area type="monotone" dataKey="violations" stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#colorViolations)" />

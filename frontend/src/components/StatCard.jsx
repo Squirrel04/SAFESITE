@@ -6,34 +6,39 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan' }) => {
         rose: 'from-rose-500 to-orange-500 shadow-rose-500/20 text-rose-400',
         violet: 'from-violet-500 to-purple-500 shadow-violet-500/20 text-violet-400',
         emerald: 'from-emerald-500 to-teal-500 shadow-emerald-500/20 text-emerald-400',
+        yellow: 'from-yellow-400 to-orange-500 shadow-yellow-500/20 text-yellow-400',
     };
 
+    const gradientClass = colorClasses[color] || colorClasses['cyan'];
+    const textClass = gradientClass.split(' ').find(c => c.startsWith('text-'));
+
     return (
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-6 group hover:border-gray-300 transition-colors shadow-sm cursor-pointer">
-            <div className="flex items-center justify-between">
+        <div className="relative overflow-hidden rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-6 group hover:border-slate-700 hover:bg-slate-900/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1">
+            <div className="flex items-center justify-between relative z-10">
                 <div>
-                    <p className="text-sm font-medium text-gray-500">{title}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+                    <p className="text-sm font-semibold text-slate-400 tracking-wide uppercase">{title}</p>
+                    <p className="text-4xl font-bold text-white mt-2 tracking-tight drop-shadow-sm">{value}</p>
                 </div>
-                <div className={`p-3 rounded-xl bg-gray-50 ${colorClasses[color].split(' ').pop().replace('text-', 'text-opacity-80 text-')}`}>
-                    <Icon className={`w-6 h-6 ${colorClasses[color].split(' ').pop()}`} />
+                <div className={`p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                    <Icon className={`w-7 h-7 ${textClass}`} />
                 </div>
             </div>
 
-            {/* Decorative gradient background glow - reduced opacity for light theme */}
-            <div className={`absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br ${colorClasses[color]} opacity-5 blur-2xl rounded-full group-hover:opacity-10 transition-opacity`}></div>
+            {/* Glowing background blob */}
+            <div className={`absolute -right-8 -top-8 w-32 h-32 bg-gradient-to-br ${gradientClass} opacity-10 blur-[40px] rounded-full group-hover:opacity-30 group-hover:-translate-x-4 group-hover:translate-y-4 transition-all duration-500`}></div>
 
-            {trend && (
-                <div className="mt-4 flex items-center text-sm">
-                    <span className={`font-semibold ${trend > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {trend > 0 ? '+' : ''}{trend}%
+            {trend !== undefined && (
+                <div className="mt-6 flex items-center text-sm relative z-10">
+                    <span className={`font-semibold px-2 py-1 rounded-md bg-opacity-10 backdrop-blur-sm shadow-sm ${trend > 0 ? 'text-emerald-400 bg-emerald-500 border border-emerald-500/20' : 'text-rose-400 bg-rose-500 border border-rose-500/20'}`}>
+                        {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
                     </span>
-                    <span className="text-gray-400 ml-2">from last hour</span>
+                    <span className="text-slate-500 ml-3 font-medium text-[13px] tracking-wide uppercase">from last hour</span>
                 </div>
             )}
-            {!trend && (
-                <div className="mt-4 flex items-center text-sm text-gray-400">
-                    <span>Stable</span>
+            {trend === undefined && (
+                <div className="mt-6 flex items-center text-sm text-slate-500 relative z-10 font-medium tracking-wide">
+                    <div className="w-2 h-2 rounded-full bg-slate-600 mr-2 -translate-y-[1px]"></div>
+                    Consistent
                 </div>
             )}
         </div>
