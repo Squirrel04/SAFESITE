@@ -4,11 +4,13 @@ import { ArrowLeft, Calendar, Camera, MapPin, AlertTriangle, Shield, Download, M
 import { motion } from 'framer-motion';
 import api from '../services/api';
 
-const ViolationDetails = () => {
-    const { id } = useParams();
+const ViolationDetails = ({ id: propId, onClose }) => {
+    const { id: paramsId } = useParams();
+    const id = propId || paramsId;
     const navigate = useNavigate();
     const [violation, setViolation] = useState(null);
     const [loading, setLoading] = useState(true);
+    const isModal = !!propId;
 
     // Mock data fallback if API fails or for demo
     const mockViolation = {
@@ -19,8 +21,8 @@ const ViolationDetails = () => {
         camera_id: 'CAM-01',
         location: 'Main Entrance',
         status: 'Open',
-        description: 'Personnel detected without required safety helmet in hazardous zone.',
-        personnel_id: 'Unknown',
+        description: 'Individual detected without required safety helmet in hazardous zone.',
+        person_id: 'Unknown',
         confidence: '98%'
     };
 
@@ -69,7 +71,7 @@ const ViolationDetails = () => {
     }
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className={`space-y-6 max-w-7xl mx-auto ${isModal ? 'p-6 bg-slate-50/50 min-h-screen' : ''}`}>
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -78,10 +80,10 @@ const ViolationDetails = () => {
             >
                 <div className="flex items-center space-x-4">
                     <button
-                        onClick={() => navigate('/alerts')}
+                        onClick={onClose || (() => navigate('/alerts'))}
                         className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200 shadow-sm hover:shadow"
                     >
-                        <ArrowLeft className="w-5 h-5 text-gray-600" />
+                        {isModal ? <XCircle className="w-5 h-5 text-gray-600" /> : <ArrowLeft className="w-5 h-5 text-gray-600" />}
                     </button>
                     <div>
                         <div className="flex items-center space-x-3">

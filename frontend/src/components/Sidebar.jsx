@@ -23,7 +23,7 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="h-screen w-64 bg-slate-900/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col fixed left-0 top-0 z-50 shadow-2xl">
+        <div className="h-screen w-64 bg-slate-900/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
             {/* Brand */}
             <div className="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/20">
                 <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl mr-3 shadow-lg shadow-cyan-500/20 flex items-center justify-center relative overflow-hidden">

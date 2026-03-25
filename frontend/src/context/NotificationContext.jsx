@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../services/api';
 
 const NotificationContext = createContext(null);
 
@@ -6,6 +7,17 @@ export const NotificationProvider = ({ children }) => {
     const [alerts, setAlerts] = useState([]);
 
     useEffect(() => {
+        const fetchInitialAlerts = async () => {
+            try {
+                const response = await api.get('/alerts/', { params: { limit: 50 } });
+                setAlerts(response.data);
+            } catch (err) {
+                console.error("Failed to fetch initial notifications:", err);
+            }
+        };
+
+        fetchInitialAlerts();
+
         const ws = new WebSocket('ws://localhost:8000/ws/notifications');
         
         ws.onmessage = (event) => {
@@ -17,8 +29,12 @@ export const NotificationProvider = ({ children }) => {
                     timestamp: data.timestamp || new Date().toISOString()
                 };
                 
-                // Add to start of list, limit to 20 for performance
-                setAlerts(prev => [newAlert, ...prev].slice(0, 20));
+                // Add to start of list, limit to 100 for better persistence
+                setAlerts(prev => {
+                    const exists = prev.some(a => a.id === newAlert.id || a._id === newAlert.id);
+                    if (exists) return prev;
+                    return [newAlert, ...prev].slice(0, 100);
+                });
             } catch (err) {
                 console.error("Failed to parse notification:", err);
             }
@@ -26,15 +42,30 @@ export const NotificationProvider = ({ children }) => {
 
         ws.onerror = (err) => console.error("Notification WS Error:", err);
         
-        return () => ws.close();
+        // Background sync every 30 seconds
+        const interval = setInterval(fetchInitialAlerts, 30000);
+        
+        return () => {
+            ws.close();
+            clearInterval(interval);
+        };
     }, []);
+
+    const refreshAlerts = async () => {
+        try {
+            const response = await api.get('/alerts/', { params: { limit: 100 } });
+            setAlerts(response.data);
+        } catch (err) {
+            console.error("Failed to refresh notifications:", err);
+        }
+    };
 
     const dismissAlert = (id) => {
         setAlerts(prev => prev.filter(a => a.id !== id));
     };
 
     return (
-        <NotificationContext.Provider value={{ alerts, dismissAlert }}>
+        <NotificationContext.Provider value={{ alerts, dismissAlert, refreshAlerts, setAlerts }}>
             {children}
         </NotificationContext.Provider>
     );

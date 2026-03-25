@@ -9,9 +9,7 @@ import { motion } from 'framer-motion';
 const Dashboard = () => {
     const [statsData, setStatsData] = useState({
         total_alerts: 0,
-        active_cameras: 0,
-        system_status: 'Online',
-        personnel: 0
+        active_cameras: 0
     });
 
     const chartData = [
@@ -42,8 +40,6 @@ const Dashboard = () => {
     const stats = [
         { title: 'Total Alerts', value: statsData.total_alerts, icon: AlertTriangle, color: 'rose', trend: 15 },
         { title: 'Active Cameras', value: `${statsData.active_cameras}/4`, icon: Camera, color: 'cyan', trend: 0 },
-        { title: 'System Status', value: statsData.system_status, icon: Activity, color: 'emerald' },
-        { title: 'Personnel', value: statsData.personnel, icon: Users, color: 'violet', trend: -5 },
     ];
 
     const cameras = [
@@ -74,7 +70,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {stats.map((stat, index) => (
                     <motion.div
                         key={index}

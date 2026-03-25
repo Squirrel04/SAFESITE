@@ -3,7 +3,7 @@ import { Bell, Search, User, ShieldCheck } from 'lucide-react';
 
 const TopBar = () => {
     return (
-        <header className="h-20 bg-slate-900/40 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-40 ml-64 shadow-sm">
+            <header className="h-20 bg-slate-900/40 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30 ml-64 shadow-sm">
             {/* Search / Breadcrumb Placeholder */}
             <div className="flex items-center">
                 <div className="relative group">

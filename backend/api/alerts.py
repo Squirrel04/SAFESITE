@@ -77,3 +77,47 @@ async def update_alert(alert_id: str, update_data: dict):
     except Exception as e:
         print(f"Error updating alert: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{alert_id}")
+async def delete_alert(alert_id: str, current_user: User = Depends(get_current_user)):
+    # Allow both admin and safety_officer to delete items
+    if current_user.role not in ["admin", "safety_officer"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions to delete evidence")
+    from bson import ObjectId
+    try:
+        if not ObjectId.is_valid(alert_id):
+            print(f"DEBUG: Invalid alert_id format: {alert_id}")
+            raise HTTPException(status_code=400, detail="Invalid alert ID format")
+            
+        result = await db.alerts.delete_one({"_id": ObjectId(alert_id)})
+        if result.deleted_count == 0:
+            print(f"DEBUG: Alert not found for deletion: {alert_id}")
+            raise HTTPException(status_code=404, detail="Alert not found")
+        return {"message": "Successfully deleted alert"}
+    except Exception as e:
+        print(f"DEBUG: Exception during delete_alert: {str(e)}")
+        if isinstance(e, HTTPException): raise e
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/delete-bulk")
+async def delete_alerts_bulk(alert_ids: List[str], current_user: User = Depends(get_current_user)):
+    # Allow both admin and safety_officer for bulk delete
+    if current_user.role not in ["admin", "safety_officer"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions to delete evidence")
+    from bson import ObjectId
+    try:
+        obj_ids = [ObjectId(aid) for aid in alert_ids]
+        result = await db.alerts.delete_many({"_id": {"$in": obj_ids}})
+        return {"message": f"Successfully deleted {result.deleted_count} alerts"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/clear")
+async def clear_alerts(current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can clear the entire log")
+    try:
+        result = await db.alerts.delete_many({})
+        return {"message": f"Successfully cleared all {result.deleted_count} alerts"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
