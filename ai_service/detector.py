@@ -11,6 +11,8 @@ class PPE_Detector:
         # person -> person
         # (We will simulate PPE detection logic on top of 'person' detection for now if using base model)
         self.classes = self.model.names
+        # Define Unauthorized Zone: (x, y, w, h) normalized? No, use absolute for simplicity now.
+        # Or just a line/rectangle.
 
     def detect(self, frame):
         results = self.model(frame)
@@ -23,78 +25,107 @@ class PPE_Detector:
                 xyxy = box.xyxy[0].tolist()
                 label = self.classes[cls_id]
                 
-                if conf > 0.45: # Lower base threshold
-                    if label == 'person':
-                        # Filter 1: Moderate Confidence Threshold for Person
-                        if conf < 0.50:
-                            continue
+                if conf < 0.40: continue
 
-                        # Filter 2: Aspect Ratio Filter
-                        # Relaxed: Allow width up to 1.2x height (bending over, carrying things)
-                        x1, y1, x2, y2 = map(int, xyxy)
-                        w = x2 - x1
-                        h = y2 - y1
-                        
-                        # If width is excessively wide compared to height, skip it.
-                        if w > h * 1.5: 
-                            continue
+                x1, y1, x2, y2 = map(int, xyxy)
+                w, h = x2 - x1, y2 - y1
+                status = "safe"
+                color = (0, 255, 0) # Default green
 
-                        # Heuristic: Check for hard hat (yellow/white) in top region of box
-                        has_helmet = self.check_ppe(frame, box, xyxy)
-                        if has_helmet:
-                            label = "Safe: Helmet"
-                            color = (0, 255, 0) # Green
-                        else:
-                            label = "Violation: No Helmet"
-                            color = (0, 0, 255) # Red
+                if label == 'person':
+                    # 1. Fall Detection (Aspect Ratio)
+                    if w > h * 1.3:
+                        label = "Fall Risk: Person Down"
+                        status = "violation"
+                        color = (0, 0, 255)
                     else:
-                        color = (255, 0, 0)
+                        # 2. PPE Detection (Helmet & Vest)
+                        has_helmet = self.check_helmet(frame, xyxy)
+                        has_vest = self.check_vest(frame, xyxy)
+                        
+                        if not has_helmet and not has_vest:
+                            label = "Violation: No PPE"
+                            status = "violation"
+                            color = (0, 0, 255)
+                        elif not has_helmet:
+                            label = "Violation: No Helmet"
+                            status = "violation"
+                            color = (0, 0, 255)
+                        elif not has_vest:
+                            label = "Violation: No Vest"
+                            status = "violation"
+                            color = (0, 0, 255)
+                        else:
+                            label = "Safe: PPE Correct"
+                        
+                        # 3. Zone Detection (Unauthorized Area)
+                        # Let's say bottom 20% of frame is danger zone
+                        h_frame, w_frame = frame.shape[:2]
+                        if y2 > h_frame * 0.8:
+                            label = "Unauthorized: Danger Zone"
+                            status = "violation"
+                            color = (0, 0, 255)
+                
+                elif label == 'truck':
+                    label = "Alert: Machinery Usage"
+                    status = "violation"
+                    color = (255, 165, 0) # Orange
+                
+                elif label == 'cell phone':
+                    label = "Unsafe: Phone Usage"
+                    status = "violation"
+                    color = (0, 165, 255) # Orange
 
-                    detections.append({
-                        "label": label,
-                        "confidence": conf,
-                        "box": xyxy,
-                        "status": "safe" if "Safe" in label else "violation"
-                    })
-                    
-                    # Draw custom box
-                    x1, y1, x2, y2 = map(int, xyxy)
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                    cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                # Skip other boring COCO classes for the demo
+                if status == "safe" and label not in ["Safe: PPE Correct", "person"]:
+                    continue
+
+                detections.append({
+                    "label": label,
+                    "confidence": conf,
+                    "box": xyxy,
+                    "status": status
+                })
+                
+                # Draw
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(frame, f"{label}", (x1, y1 - 10), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         return detections, frame
 
-    def check_ppe(self, frame, box, xyxy):
-        # Extract head region (top 1/5th of bounding box)
+    def check_helmet(self, frame, xyxy):
         x1, y1, x2, y2 = map(int, xyxy)
-        height = y2 - y1
-        head_h = int(height / 5)
-        # Clamp
-        head_roi = frame[y1:y1+head_h, x1:x2]
+        head_h = int((y2 - y1) / 5)
+        roi = frame[y1:y1+head_h, x1:x2]
+        if roi.size == 0: return False
         
-        if head_roi.size == 0: return False
-
-        # Convert to HSV
-        hsv = cv2.cvtColor(head_roi, cv2.COLOR_BGR2HSV)
-
-        # Yellow range (for plastic helmets)
+        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        # Yellow & White detection
         lower_yellow = np.array([20, 100, 100])
         upper_yellow = np.array([30, 255, 255])
-        
-        # White range (for white helmets - harder, can confuse with light)
-        # Let's stick to yellow detection or high brightness for now
-        # lower_white = np.array([0, 0, 200]) 
-        # upper_white = np.array([180, 20, 255])
-
         mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-        # mask_white = cv2.inRange(hsv, lower_white, upper_white)
         
-        # Count non-zero pixels
-        yellow_pixels = cv2.countNonZero(mask_yellow)
-        total_pixels = head_roi.shape[0] * head_roi.shape[1]
+        # Simple brightness check for white helmets
+        _, bright = cv2.threshold(cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY)
         
-        ratio = yellow_pixels / total_pixels if total_pixels > 0 else 0
+        return cv2.countNonZero(mask_yellow) > 20 or cv2.countNonZero(bright) > 40
+
+    def check_vest(self, frame, xyxy):
+        x1, y1, x2, y2 = map(int, xyxy)
+        h = y2 - y1
+        # Vest is in the middle of the body
+        roi = frame[y1+int(h/4):y1+int(h*3/4), x1:x2]
+        if roi.size == 0: return False
         
-        # Threshold (audit this visually)
-        return ratio > 0.05
+        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+        # Neon Orange / Green ranges
+        lower_orange = np.array([0, 100, 100])
+        upper_orange = np.array([15, 255, 255])
+        lower_neon = np.array([35, 100, 100])
+        upper_neon = np.array([85, 255, 255])
+        
+        mask_o = cv2.inRange(hsv, lower_orange, upper_orange)
+        mask_n = cv2.inRange(hsv, lower_neon, upper_neon)
+        
+        return cv2.countNonZero(mask_o) > 50 or cv2.countNonZero(mask_n) > 50

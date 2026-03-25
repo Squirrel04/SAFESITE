@@ -90,11 +90,21 @@ const Alerts = () => {
                                     >
                                         <td className="p-5">
                                             <div className="flex items-center space-x-3">
-                                                <div className={`p-2.5 rounded-xl border shadow-sm ${getSeverityColor(alert.severity).replace('text-', 'bg-opacity-10 bg-')}`}>
-                                                    <AlertTriangle className={`w-5 h-5 ${getSeverityColor(alert.severity).split(' ').pop()}`} />
+                                                <div className="relative">
+                                                    <div className={`p-2.5 rounded-xl border shadow-sm ${getSeverityColor(alert.severity).replace('text-', 'bg-opacity-10 bg-')}`}>
+                                                        <AlertTriangle className={`w-5 h-5 ${getSeverityColor(alert.severity).split(' ').pop()}`} />
+                                                    </div>
+                                                    {alert.image_url && (
+                                                        <div className="absolute -top-1 -right-1 w-8 h-8 rounded-lg border-2 border-slate-900 overflow-hidden shadow-lg group-hover:scale-150 transition-transform z-10">
+                                                            <img src={alert.image_url} alt="Still" className="w-full h-full object-cover" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-white transition-colors">{alert.alert_type}</p>
+                                                    <p className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-white transition-colors flex items-center">
+                                                        {alert.alert_type}
+                                                        {alert.video_url && <span className="ml-2 w-2 h-2 bg-rose-500 rounded-full animate-pulse" title="Video Available" />}
+                                                    </p>
                                                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border mt-1 inline-block ${getSeverityColor(alert.severity)}`}>
                                                         {alert.severity}
                                                     </span>

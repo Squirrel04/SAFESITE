@@ -1,16 +1,18 @@
+import os
+# Set environment variable to fix potential OpenMP conflicts (WinError 1114)
+# This MUST be done before importing torch/ultralytics
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import cv2
 import time
 import requests
-import os
-# Set environment variable to fix potential OpenMP conflicts (WinError 1114)
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-CAMERA_SOURCE = os.getenv("CAMERA_SOURCE", "test_video.avi") # Default to webcam
+CAMERA_SOURCE = os.getenv("CAMERA_SOURCE", "test_safety.mp4") # Default to test video
 
 def open_camera(source):
     """Attempt to open a camera source with fallback strategies."""
@@ -40,6 +42,52 @@ import websockets
 import json
 import aiohttp
 
+import aiohttp
+from collections import deque
+
+class SnapshotRecorder:
+    def __init__(self, fps=15, pre_roll=2, post_roll=3):
+        self.fps = fps
+        self.pre_roll_frames = int(fps * pre_roll)
+        self.post_roll_frames = int(fps * post_roll)
+        self.buffer = deque(maxlen=self.pre_roll_frames)
+        self.recording_frames = []
+        self.is_recording = False
+        self.frames_left = 0
+        self.last_filename = None
+
+    def add_frame(self, frame):
+        if not self.is_recording:
+            self.buffer.append(frame.copy())
+        else:
+            self.recording_frames.append(frame.copy())
+            self.frames_left -= 1
+            if self.frames_left <= 0:
+                self.save_recording()
+
+    def start_recording(self):
+        if not self.is_recording:
+            self.is_recording = True
+            self.recording_frames = list(self.buffer)
+            self.frames_left = self.post_roll_frames
+
+    def save_recording(self):
+        self.is_recording = False
+        if not self.recording_frames: return
+        
+        timestamp = int(time.time())
+        filename = f"snapshot_{timestamp}.mp4"
+        h, w = self.recording_frames[0].shape[:2]
+        
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(filename, fourcc, self.fps, (w, h))
+        for f in self.recording_frames:
+            out.write(f)
+        out.release()
+        self.last_filename = filename
+        print(f"Snapshot saved: {filename}")
+        self.recording_frames = []
+
 BACKEND_WS_URL = os.getenv("BACKEND_WS_URL", "ws://localhost:8000/ws/stream/upload/01") # Default cam ID 01
 
 async def stream_frames():
@@ -63,6 +111,7 @@ async def stream_frames():
             async with websockets.connect(BACKEND_WS_URL) as websocket:
                 print(f"Connected to backend at {BACKEND_WS_URL}")
                 last_status_check = 0
+                last_fps_log = 0
                 is_active = False
 
                 while True:
@@ -106,6 +155,13 @@ async def stream_frames():
                             continue
 
                     # Detection
+                    recorder = locals().get('recorder')
+                    if recorder is None:
+                        recorder = SnapshotRecorder()
+                        locals()['recorder'] = recorder
+                    
+                    recorder.add_frame(frame)
+                    
                     annotated_frame = frame
                     detections = []
                     current_frame_has_violation = False
@@ -145,21 +201,21 @@ async def stream_frames():
                             
                             threading.Thread(target=play_alarm, daemon=True).start()
 
-                            # Encode frame to Base64 for storage
-                            import base64
-                            _, buffer = cv2.imencode('.jpg', annotated_frame)
-                            jpg_as_text = base64.b64encode(buffer).decode('utf-8')
-                            base64_image = f"data:image/jpeg;base64,{jpg_as_text}"
+                            # Save temporary high-quality image for storage
+                            temp_img_name = f"alert_still_{int(time.time())}.jpg"
+                            cv2.imwrite(temp_img_name, annotated_frame)
 
-                            # Send Alert
+                            # Trigger Snapshot
+                            recorder.start_recording()
+                            
                             alert_payload = {
                                 "camera_id": "01",
-                                "alert_type": "PPE Violation",
+                                "alert_type": violation_data['label'].split(':')[0],
                                 "message": f"Detected: {violation_data['label']}",
                                 "severity": "high",
-                                "image_url": base64_image
+                                "temp_image_path": temp_img_name # This will be handled in send_alert_async
                             }
-                            asyncio.create_task(send_alert_async(alert_payload))
+                            asyncio.create_task(send_alert_async(alert_payload, recorder))
                     else:
                         # Falling Edge: Violation cleared
                         if is_violation_active:
@@ -177,7 +233,14 @@ async def stream_frames():
                         # TODO: Could also send detection metadata as text/json in a separate channel or interleaved?
                         # For now, just streaming the annotated video.
 
-                    await asyncio.sleep(0.03) # Cap at ~30 FPS
+                    # Performance check
+                    process_time = time.time() - current_time
+                    fps = 1.0 / process_time if process_time > 0 else 0
+                    if current_time - last_fps_log > 2.0: # Log every 2 seconds
+                        last_fps_log = current_time
+                        print(f"Streaming at {fps:.2f} FPS (Process time: {process_time*1000:.1f}ms per frame)")
+
+                    await asyncio.sleep(max(0, 0.06 - process_time)) # Target ~15 FPS (more stable)
 
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError) as e:
             print(f"Connection lost or refused: {e}. Retrying in 5 seconds...")
@@ -191,11 +254,52 @@ async def stream_frames():
 
 import aiohttp
 
-async def send_alert_async(alert_data):
+async def send_alert_async(alert_data, recorder=None):
     try:
         async with aiohttp.ClientSession() as session:
+            # 1. Upload Static Image first if provided as local path
+            if 'temp_image_path' in alert_data:
+                img_path = alert_data.pop('temp_image_path')
+                with open(img_path, 'rb') as f:
+                    form = aiohttp.FormData()
+                    form.add_field('file', f, filename=os.path.basename(img_path))
+                    async with session.post(f"{BACKEND_URL}/alerts/upload-evidence", data=form) as img_resp:
+                        if img_resp.status == 200:
+                            img_data = await img_resp.json()
+                            alert_data['image_url'] = f"{BACKEND_URL}{img_data.get('url')}"
+                try: os.remove(img_path) 
+                except: pass
+
+            # 2. Create Alert
             async with session.post(f"{BACKEND_URL}/alerts/", json=alert_data) as resp:
-                if resp.status != 200:
+                if resp.status == 200:
+                    alert_result = await resp.json()
+                    alert_id = alert_result.get("id")
+                    print(f"Alert created: {alert_id}")
+                    
+                    # 3. Wait for recorder to finish and upload video
+                    if recorder and alert_id:
+                        while recorder.is_recording:
+                            await asyncio.sleep(0.5)
+                        
+                        if recorder.last_filename:
+                            video_file = recorder.last_filename
+                            with open(video_file, 'rb') as f:
+                                form = aiohttp.FormData()
+                                form.add_field('file', f, filename=video_file)
+                                async with session.post(f"{BACKEND_URL}/alerts/upload-evidence", data=form) as upload_resp:
+                                    if upload_resp.status == 200:
+                                        upload_data = await upload_resp.json()
+                                        video_url = f"{BACKEND_URL}{upload_data.get('url')}"
+                                        
+                                        # 4. PATCH Alert with video_url
+                                        patch_data = {"video_url": video_url}
+                                        async with session.patch(f"{BACKEND_URL}/alerts/{alert_id}", json=patch_data) as patch_resp:
+                                            if patch_resp.status == 200:
+                                                print(f"Video evidence associated: {video_url}")
+                                            else:
+                                                print(f"Failed to patch alert: {patch_resp.status}")
+                else:
                     print(f"Failed to send alert: {resp.status}")
     except Exception as e:
         print(f"Failed to send alert: {e}")

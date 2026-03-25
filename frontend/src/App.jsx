@@ -15,23 +15,27 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+import { NotificationProvider } from './context/NotificationContext';
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="alerts" element={<Alerts />} />
-            <Route path="violation/:id" element={<ViolationDetails />} />
-            <Route path="cameras" element={<Cameras />} />
-          </Route>
-        </Routes>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="alerts" element={<Alerts />} />
+              <Route path="violation/:id" element={<ViolationDetails />} />
+              <Route path="cameras" element={<Cameras />} />
+            </Route>
+          </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter >
   );

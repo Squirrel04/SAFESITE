@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Camera, Maximize2, RefreshCw } from 'lucide-react';
 
 const LiveCameraFeed = ({ id, location }) => {
+    const [activeBuffer, setActiveBuffer] = useState(1);
+    const [buffer1, setBuffer1] = useState(null);
+    const [buffer2, setBuffer2] = useState(null);
     const [status, setStatus] = useState('connecting'); // connecting, online, offline
-    const [imageSrc, setImageSrc] = useState(null);
     const wsRef = useRef(null);
     const retryTimeoutRef = useRef(null);
 
@@ -21,15 +23,13 @@ const LiveCameraFeed = ({ id, location }) => {
         };
 
         ws.onmessage = (event) => {
-            // Received a blob
             const blob = event.data;
             const url = URL.createObjectURL(blob);
-
-            // Revoke previous URL to prevent memory leaks
-            if (imageSrc) {
-                URL.revokeObjectURL(imageSrc);
+            if (activeBuffer === 1) {
+                setBuffer2(url);
+            } else {
+                setBuffer1(url);
             }
-            setImageSrc(url);
         };
 
         ws.onclose = () => {
@@ -50,9 +50,10 @@ const LiveCameraFeed = ({ id, location }) => {
         return () => {
             if (wsRef.current) wsRef.current.close();
             if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
-            if (imageSrc) URL.revokeObjectURL(imageSrc);
+            if (buffer1) URL.revokeObjectURL(buffer1);
+            if (buffer2) URL.revokeObjectURL(buffer2);
         };
-    }, [id]);
+    }, []);
 
     return (
         <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 group shadow-md">
@@ -74,17 +75,40 @@ const LiveCameraFeed = ({ id, location }) => {
 
             {/* Video Content */}
             <div className="aspect-video bg-gray-950 relative flex items-center justify-center">
-                {status === 'online' && imageSrc ? (
-                    <img
-                        src={imageSrc}
-                        alt={`Live Feed ${id}`}
-                        className="w-full h-full object-cover"
-                        onLoad={() => {
-                            if (imageSrc) URL.revokeObjectURL(imageSrc); // Revoke immediately after load to save memory? Actually typical pattern is waiting for next frame.
-                            // Better: relying on the onmessage to revoke previous or just let browser handle tiny internal revokes if using blobs differently.
-                            // The current approach in onmessage is correct.
-                        }}
-                    />
+                {status === 'online' && (buffer1 || buffer2) ? (
+                    <div className="w-full h-full relative">
+                        {buffer1 && (
+                            <img
+                                src={buffer1}
+                                alt={`Live Feed ${id} - B1`}
+                                className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-100 ${activeBuffer === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                                onLoad={() => {
+                                    if (activeBuffer === 2) {
+                                        setActiveBuffer(1);
+                                        if (buffer2) {
+                                            // Optional: delay revocation slightly or use a ref-collection
+                                            setTimeout(() => URL.revokeObjectURL(buffer2), 100);
+                                        }
+                                    }
+                                }}
+                            />
+                        )}
+                        {buffer2 && (
+                            <img
+                                src={buffer2}
+                                alt={`Live Feed ${id} - B2`}
+                                className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-100 ${activeBuffer === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                                onLoad={() => {
+                                    if (activeBuffer === 1) {
+                                        setActiveBuffer(2);
+                                        if (buffer1) {
+                                            setTimeout(() => URL.revokeObjectURL(buffer1), 100);
+                                        }
+                                    }
+                                }}
+                            />
+                        )}
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center text-gray-600 justify-center h-full w-full bg-gray-900">
                         {status === 'connecting' ? (

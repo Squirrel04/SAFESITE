@@ -3,12 +3,12 @@ echo Setting up Backend Environment...
 python -m venv backend\venv
 call backend\venv\Scripts\activate
 pip install -r backend\requirements.txt
-deactivate
+call deactivate
 
 echo Setting up AI Service Environment...
 python -m venv ai_service\venv
 call ai_service\venv\Scripts\activate
 pip install -r ai_service\requirements.txt
-deactivate
+call deactivate
 
 echo Setup Component!

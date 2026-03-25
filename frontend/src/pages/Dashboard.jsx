@@ -14,7 +14,6 @@ const Dashboard = () => {
         personnel: 0
     });
 
-    // Mock data for the chart - in a real app, fetch historical stats
     const chartData = [
         { time: '08:00', detections: 2, violations: 0 },
         { time: '09:00', detections: 15, violations: 1 },
@@ -36,8 +35,7 @@ const Dashboard = () => {
         };
 
         fetchStats();
-        // Poll every 5 seconds
-        const interval = setInterval(fetchStats, 5000);
+        const interval = setInterval(fetchStats, 10000);
         return () => clearInterval(interval);
     }, []);
 

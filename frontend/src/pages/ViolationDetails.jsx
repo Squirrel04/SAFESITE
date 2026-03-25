@@ -115,34 +115,61 @@ const ViolationDetails = () => {
                     className="lg:col-span-2 space-y-6"
                 >
                     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                            <h2 className="font-semibold text-gray-900 flex items-center">
-                                <Camera className="w-5 h-5 mr-2 text-cyan-600" />
-                                Evidence Snapshot
+                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h2 className="font-semibold text-gray-900 flex items-center text-sm">
+                                <Camera className="w-4 h-4 mr-2 text-cyan-600" />
+                                Visual Evidence Log
                             </h2>
-                            <span className="text-xs font-mono text-gray-400">CAM_ID: {violation.camera_id}</span>
+                            <div className="flex gap-2">
+                                <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">CAM: {violation.camera_id}</span>
+                                {violation.video_url && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />Video Evidence</span>}
+                            </div>
                         </div>
-                        <div className="aspect-video bg-gray-900 relative flex items-center justify-center group">
-                            {violation.image_url ? (
-                                <img
-                                    src={violation.image_url}
-                                    alt="Evidence Snapshot"
-                                    className="w-full h-full object-contain"
-                                />
-                            ) : (
-                                <div className="text-center">
-                                    <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4 opacity-50" />
-                                    <p className="text-gray-400 font-medium">Snapshot Evidence Unavailable</p>
-                                    <p className="text-gray-600 text-sm">Frame captured at {new Date(violation.timestamp).toLocaleTimeString()}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200">
+                            {/* Snapshot Image */}
+                            <div className="aspect-video bg-gray-950 relative overflow-hidden group">
+                                {violation.image_url ? (
+                                    <img
+                                        src={violation.image_url}
+                                        alt="Evidence Snapshot"
+                                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                                        <Camera className="w-10 h-10 mb-2 opacity-20" />
+                                        <p className="text-xs font-medium uppercase tracking-widest opacity-40 leading-none">Still Snapshot</p>
+                                        <p className="text-[10px] opacity-30 mt-1">Unavailable</p>
+                                    </div>
+                                )}
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded border border-white/10 uppercase tracking-widest">Snapshot</span>
                                 </div>
-                            )}
+                            </div>
 
-                            {/* Overlay Details */}
-                            <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
-                                <p className="text-white text-sm font-mono flex items-center">
-                                    <Shield className="w-3 h-3 mr-2 text-red-500" />
-                                    Confidence: {violation.confidence}
-                                </p>
+                            {/* Video Evidence */}
+                            <div className="aspect-video bg-gray-950 relative overflow-hidden group">
+                                {violation.video_url ? (
+                                    <video
+                                        src={violation.video_url}
+                                        controls
+                                        className="w-full h-full object-cover"
+                                        poster={violation.image_url}
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-500 italic">
+                                        <div className="relative">
+                                            <AlertTriangle className="w-10 h-10 mb-2 opacity-20" />
+                                            <div className="absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full animate-ping" />
+                                        </div>
+                                        <p className="text-xs font-medium uppercase tracking-widest opacity-40 leading-none">Video Evidence</p>
+                                        <p className="text-[10px] opacity-30 mt-1">Processing Clip...</p>
+                                    </div>
+                                )}
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-rose-600/80 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded border border-white/10 uppercase tracking-widest flex items-center">
+                                        <div className="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse" /> Recording
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
