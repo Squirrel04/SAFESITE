@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan' }) => {
+const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan', onClick }) => {
     const colorClasses = {
         cyan: 'from-cyan-500 to-blue-500 shadow-cyan-500/20 text-cyan-400',
         rose: 'from-rose-500 to-orange-500 shadow-rose-500/20 text-rose-400',
@@ -13,7 +13,10 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan' }) => {
     const textClass = gradientClass.split(' ').find(c => c.startsWith('text-'));
 
     return (
-        <div className="relative overflow-hidden rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-6 group hover:border-slate-700 hover:bg-slate-900/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1">
+        <div 
+            onClick={onClick}
+            className="relative overflow-hidden rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-6 group hover:border-slate-700 hover:bg-slate-900/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1"
+        >
             <div className="flex items-center justify-between relative z-10">
                 <div>
                     <p className="text-sm font-semibold text-slate-400 tracking-wide uppercase">{title}</p>

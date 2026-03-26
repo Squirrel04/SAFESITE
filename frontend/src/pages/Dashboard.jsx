@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import LiveCameraFeed from '../components/LiveCameraFeed';
 import { AlertTriangle, Camera, Activity, Users, Shield } from 'lucide-react';
@@ -7,6 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const [statsData, setStatsData] = useState({
         total_alerts: 0,
         active_cameras: 0
@@ -38,8 +40,22 @@ const Dashboard = () => {
     }, []);
 
     const stats = [
-        { title: 'Total Alerts', value: statsData.total_alerts, icon: AlertTriangle, color: 'rose', trend: 15 },
-        { title: 'Active Cameras', value: `${statsData.active_cameras}/4`, icon: Camera, color: 'cyan', trend: 0 },
+        { 
+            title: 'Total Alerts', 
+            value: statsData.total_alerts, 
+            icon: AlertTriangle, 
+            color: 'rose', 
+            trend: 15,
+            onClick: () => navigate('/alerts')
+        },
+        { 
+            title: 'Active Cameras', 
+            value: `${statsData.active_cameras}/4`, 
+            icon: Camera, 
+            color: 'cyan', 
+            trend: 0,
+            onClick: () => navigate('/cameras')
+        },
     ];
 
     const cameras = [

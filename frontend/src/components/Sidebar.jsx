@@ -11,11 +11,6 @@ const Sidebar = () => {
     const { alerts, dismissAlert } = useNotifications();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
-
     const navItems = [
         { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/alerts', icon: AlertTriangle, label: 'Alerts' },
@@ -112,16 +107,6 @@ const Sidebar = () => {
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-slate-800 bg-slate-900/30">
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-3.5 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-2xl transition-all duration-300 group"
-                >
-                    <LogOut className="w-5 h-5 mr-3 group-hover:-translate-x-1 transition-transform" />
-                    <span className="font-medium tracking-wide">Secure Logout</span>
-                </button>
-            </div>
         </div>
     );
 };

@@ -1,9 +1,21 @@
-import React from 'react';
-import { Bell, Search, User, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, User, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const TopBar = () => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
-            <header className="h-20 bg-slate-900/40 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30 ml-64 shadow-sm">
+        <header className="h-20 bg-slate-900/40 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30 ml-64 shadow-sm">
             {/* Search / Breadcrumb Placeholder */}
             <div className="flex items-center">
                 <div className="relative group">
@@ -25,19 +37,44 @@ const TopBar = () => {
 
                 <div className="h-8 w-px bg-slate-800"></div>
 
-                <button className="relative p-2.5 text-slate-400 hover:text-cyan-400 transition-colors rounded-xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50">
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse"></span>
-                </button>
+                <div className="relative">
+                    <div 
+                        className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50 transition-all group"
+                        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center border border-slate-600 shadow-inner group-hover:border-cyan-500/50 transition-colors">
+                            <User className="w-4 h-4 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+                        </div>
+                        <div className="flex items-center">
+                            <div>
+                                <p className="text-slate-200 font-semibold leading-none text-sm group-hover:text-white transition-colors">{user?.username || 'Admin User'}</p>
+                                <p className="text-slate-500 text-[11px] mt-1 font-mono tracking-wider">SUPERVISOR</p>
+                            </div>
+                            <ChevronDown className={`w-4 h-4 ml-3 text-slate-500 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                        </div>
+                    </div>
 
-                <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50 transition-all group">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center border border-slate-600 shadow-inner group-hover:border-cyan-500/50 transition-colors">
-                        <User className="w-4 h-4 text-slate-300 group-hover:text-cyan-400 transition-colors" />
-                    </div>
-                    <div>
-                        <p className="text-slate-200 font-semibold leading-none text-sm group-hover:text-white transition-colors">Admin User</p>
-                        <p className="text-slate-500 text-[11px] mt-1 font-mono tracking-wider">SUPERVISOR</p>
-                    </div>
+                    <AnimatePresence>
+                        {showProfileDropdown && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setShowProfileDropdown(false)} />
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute right-0 mt-2 w-56 p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-20 backdrop-blur-xl"
+                                >
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors font-medium text-sm group"
+                                    >
+                                        <LogOut className="w-4 h-4 mr-3 group-hover:-translate-x-1 transition-transform" />
+                                        Log Out
+                                    </button>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </header>
