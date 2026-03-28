@@ -9,7 +9,7 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         const fetchInitialAlerts = async () => {
             try {
-                const response = await api.get('/alerts/', { params: { limit: 50 } });
+                const response = await api.get('/alerts/', { params: { limit: 10000 } });
                 setAlerts(response.data);
             } catch (err) {
                 console.error("Failed to fetch initial notifications:", err);
@@ -29,11 +29,11 @@ export const NotificationProvider = ({ children }) => {
                     timestamp: data.timestamp || new Date().toISOString()
                 };
                 
-                // Add to start of list, limit to 100 for better persistence
+                // Add to start of list, limit to 10000 for better persistence
                 setAlerts(prev => {
                     const exists = prev.some(a => a.id === newAlert.id || a._id === newAlert.id);
                     if (exists) return prev;
-                    return [newAlert, ...prev].slice(0, 100);
+                    return [newAlert, ...prev].slice(0, 10000);
                 });
             } catch (err) {
                 console.error("Failed to parse notification:", err);
@@ -53,7 +53,7 @@ export const NotificationProvider = ({ children }) => {
 
     const refreshAlerts = async () => {
         try {
-            const response = await api.get('/alerts/', { params: { limit: 100 } });
+            const response = await api.get('/alerts/', { params: { limit: 10000 } });
             setAlerts(response.data);
         } catch (err) {
             console.error("Failed to refresh notifications:", err);

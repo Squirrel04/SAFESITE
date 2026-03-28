@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, User, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,22 @@ const TopBar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowProfileDropdown(false);
+            }
+        };
+
+        if (showProfileDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showProfileDropdown]);
 
     const handleLogout = () => {
         logout();
@@ -37,7 +53,7 @@ const TopBar = () => {
 
                 <div className="h-8 w-px bg-slate-800"></div>
 
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                     <div 
                         className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50 transition-all group"
                         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -56,23 +72,20 @@ const TopBar = () => {
 
                     <AnimatePresence>
                         {showProfileDropdown && (
-                            <>
-                                <div className="fixed inset-0 z-10" onClick={() => setShowProfileDropdown(false)} />
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 mt-2 w-56 p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-20 backdrop-blur-xl"
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute right-0 mt-2 w-56 p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-20 backdrop-blur-xl"
+                            >
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors font-medium text-sm group"
                                 >
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full flex items-center px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors font-medium text-sm group"
-                                    >
-                                        <LogOut className="w-4 h-4 mr-3 group-hover:-translate-x-1 transition-transform" />
-                                        Log Out
-                                    </button>
-                                </motion.div>
-                            </>
+                                    <LogOut className="w-4 h-4 mr-3 group-hover:-translate-x-1 transition-transform" />
+                                    Log Out
+                                </button>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>

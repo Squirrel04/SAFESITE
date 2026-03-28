@@ -6,9 +6,11 @@ import { AlertTriangle, Camera, Activity, Users, Shield } from 'lucide-react';
 import api from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
+import { useNotifications } from '../context/NotificationContext';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const { alerts } = useNotifications();
     const [statsData, setStatsData] = useState({
         total_alerts: 0,
         active_cameras: 0
@@ -42,7 +44,7 @@ const Dashboard = () => {
     const stats = [
         { 
             title: 'Total Alerts', 
-            value: statsData.total_alerts, 
+            value: alerts.length, 
             icon: AlertTriangle, 
             color: 'rose', 
             trend: 15,

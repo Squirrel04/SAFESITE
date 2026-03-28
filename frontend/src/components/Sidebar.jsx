@@ -13,7 +13,7 @@ const Sidebar = () => {
 
     const navItems = [
         { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-        { path: '/alerts', icon: AlertTriangle, label: 'Alerts' },
+        { path: '/alerts', icon: AlertTriangle, label: 'Evidence' },
         { path: '/cameras', icon: Camera, label: 'Cameras' },
     ];
 

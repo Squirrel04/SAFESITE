@@ -9,7 +9,7 @@ from datetime import datetime
 router = APIRouter()
 
 @router.get("/", response_model=List[Alert])
-async def get_alerts(skip: int = 0, limit: int = 100, current_user: User = Depends(get_current_user)):
+async def get_alerts(skip: int = 0, limit: int = 10000, current_user: User = Depends(get_current_user)):
     alerts_cursor = db.alerts.find().sort("timestamp", -1).skip(skip).limit(limit)
     alerts = await alerts_cursor.to_list(length=limit)
     # Convert ObjectId to str
