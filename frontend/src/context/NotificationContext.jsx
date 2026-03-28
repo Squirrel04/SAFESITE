@@ -29,10 +29,14 @@ export const NotificationProvider = ({ children }) => {
                     timestamp: data.timestamp || new Date().toISOString()
                 };
                 
-                // Add to start of list, limit to 10000 for better persistence
+                // Add or update list, limit to 10000 for better persistence
                 setAlerts(prev => {
-                    const exists = prev.some(a => a.id === newAlert.id || a._id === newAlert.id);
-                    if (exists) return prev;
+                    const index = prev.findIndex(a => a.id === newAlert.id || a._id === newAlert.id);
+                    if (index >= 0) {
+                        const next = [...prev];
+                        next[index] = { ...next[index], ...newAlert };
+                        return next;
+                    }
                     return [newAlert, ...prev].slice(0, 10000);
                 });
             } catch (err) {

@@ -52,7 +52,7 @@ const Dashboard = () => {
         },
         { 
             title: 'Active Cameras', 
-            value: `${statsData.active_cameras}/4`, 
+            value: `${statsData.active_cameras || 0}/${statsData.total_cameras || 2}`, 
             icon: Camera, 
             color: 'cyan', 
             trend: 0,

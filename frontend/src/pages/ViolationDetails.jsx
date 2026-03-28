@@ -10,6 +10,7 @@ const ViolationDetails = ({ id: propId, onClose }) => {
     const navigate = useNavigate();
     const [violation, setViolation] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isResolving, setIsResolving] = useState(false);
     const isModal = !!propId;
 
     // Mock data fallback if API fails or for demo
@@ -50,6 +51,18 @@ const ViolationDetails = ({ id: propId, onClose }) => {
             case 'medium': return 'text-orange-600 bg-orange-50 border-orange-200';
             case 'low': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
             default: return 'text-gray-600 bg-gray-50 border-gray-200';
+        }
+    };
+
+    const handleResolve = async () => {
+        setIsResolving(true);
+        try {
+            await api.patch(`/alerts/${id}`, { is_resolved: true });
+            setViolation(prev => ({ ...prev, status: 'Resolved' }));
+        } catch (error) {
+            console.error("Failed to resolve alert:", error);
+        } finally {
+            setIsResolving(false);
         }
     };
 
@@ -234,9 +247,17 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                             <h3 className="font-semibold text-gray-900">Resolution Actions</h3>
                         </div>
                         <div className="p-4 space-y-3">
-                            <button className="w-full flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors font-medium text-sm shadow-sm shadow-emerald-500/20">
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Acknowledge & Resolve
+                            <button 
+                                onClick={handleResolve}
+                                disabled={isResolving || violation.status === 'Resolved'}
+                                className={`w-full flex items-center justify-center px-4 py-2 ${violation.status === 'Resolved' ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20'} rounded-xl transition-colors font-medium text-sm`}
+                            >
+                                {isResolving ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                ) : (
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                )}
+                                {violation.status === 'Resolved' ? 'Resolved / Muted' : 'Acknowledge & Resolve'}
                             </button>
                             <button className="w-full flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm">
                                 <XCircle className="w-4 h-4 mr-2 text-gray-400" />

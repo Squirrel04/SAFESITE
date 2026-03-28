@@ -1,21 +1,25 @@
-from ultralytics import YOLO
 import cv2
-import numpy as np
+from ultralytics import YOLO
 
 class PPE_Detector:
-    def __init__(self, model_path="runs/detect/yolov8n_custom/weights/best.pt"):
+    def __init__(self, ppe_model_path="ppe_repo/models/best.pt", phone_model_path="yolov8m.pt"):
         import os
-        if os.path.exists(model_path):
-            self.model = YOLO(model_path)
-            self.is_custom = True
-            print(f"Loaded custom model: {model_path}")
+        
+        # 1. Load the highly accurate YOLO medium model for cell phones and humans
+        print(f"Loading Base Human/Phone model: {phone_model_path}")
+        self.phone_model = YOLO(phone_model_path)
+        
+        # 2. Load the custom PPE weights
+        if os.path.exists(ppe_model_path):
+            print(f"Loading Custom PPE model: {ppe_model_path}")
+            self.ppe_model = YOLO(ppe_model_path)
+            self.has_ppe = True
         else:
-            print(f"Custom model not found at {model_path}. Falling back to default yolov8n.pt")
-            self.model = YOLO("yolov8n.pt")
-            self.is_custom = False
+            print(f"Warning: {ppe_model_path} not found. PPE checking will be disabled.")
+            self.ppe_model = None
+            self.has_ppe = False
+        self.muted_labels = []
             
-        self.classes = self.model.names
-
     def calculate_iou(self, box1, box2):
         x_left = max(box1[0], box2[0])
         y_top = max(box1[1], box2[1])
@@ -28,144 +32,117 @@ class PPE_Detector:
         intersection_area = (x_right - x_left) * (y_bottom - y_top)
         box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
         box2_area = (box2[2] - box2[0]) * (box2[3] - box2[1])
+        
+        denominator = min(box1_area, box2_area)
+        if denominator <= 0:
+            return 0.0
 
-        # Overlapping percentage of the smaller object (helmet/vest) inside the larger object (person)
-        return intersection_area / min(box1_area, box2_area)
+        # Overlapping percentage of the smaller object (PPE) inside the larger object (person)
+        return intersection_area / denominator
 
     def detect(self, frame):
-        results = self.model(frame)
         detections = []
         
-        # Parse all raw boxes for overlap logic
-        raw_boxes = []
-        for result in results:
+        # 1. PREDICT PHONE/HUMAN
+        persons = []
+        other_phone_boxes = []
+        phone_results = self.phone_model(frame, classes=[0, 67], verbose=False)
+        for result in phone_results:
             for box in result.boxes:
-                cls_id = int(box.cls[0])
-                conf = float(box.conf[0])
-                if conf < 0.40: continue
+                if float(box.conf[0]) < 0.25: continue
                 xyxy = box.xyxy[0].tolist()
-                label = self.classes[cls_id].lower()
-                raw_boxes.append({"label": label, "conf": conf, "box": xyxy})
+                label = self.phone_model.names[int(box.cls[0])].lower()
+                if label == 'person':
+                    persons.append({"box": xyxy, "conf": float(box.conf[0])})
+                else:
+                    other_phone_boxes.append({"label": label, "box": xyxy, "conf": float(box.conf[0])})
 
-        # Process detections
-        for item in raw_boxes:
-            label = item["label"]
-            conf = item["conf"]
-            xyxy = item["box"]
+        # 2. PREDICT PPE ITEMS
+        ppe_boxes = []
+        if self.has_ppe:
+            ppe_results = self.ppe_model(frame, verbose=False)
+            for result in ppe_results:
+                for box in result.boxes:
+                    if float(box.conf[0]) < 0.35: continue
+                    xyxy = box.xyxy[0].tolist()
+                    label = self.ppe_model.names[int(box.cls[0])].lower()
+                    ppe_boxes.append({"label": label, "box": xyxy, "conf": float(box.conf[0])})
+
+        # 3. VERIFY 4-PIECE PPE ON INDIVIDUAL HUMANS
+        for p in persons:
+            xyxy = p["box"]
             x1, y1, x2, y2 = map(int, xyxy)
             w, h = x2 - x1, y2 - y1
             status = "safe"
             color = (0, 255, 0)
-            final_label = label.title()
+            
+            # Check 4 distinct PPE items intersecting this person
+            has_helmet = any(b["label"] in ["hardhat", "helmet", "safety helmet"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
+            has_vest = any(b["label"] in ["vest", "safety vest"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
+            has_shoes = any(b["label"] in ["shoes", "boots", "safety shoes"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
+            has_gloves = any(b["label"] in ["gloves", "safety gloves"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
 
-            # MACHINERY / VEHICLE logic - strict separation from PPE
+            missing = []
+            if not has_helmet: missing.append("Helmet")
+            if not has_vest: missing.append("Vest")
+            # We ONLY alert for Shoes and Gloves explicitly to avoid redundant noisy arrays
+            if not has_shoes: missing.append("Shoes")
+            if not has_gloves: missing.append("Gloves")
+
+            if w > h * 1.3:
+                final_label = "Fall Risk: Person Down"
+                status = "violation"
+                color = (0, 0, 255)
+            elif missing:
+                if len(missing) >= 3:
+                    final_label = "Violation: No PPE"
+                else:
+                    final_label = f"Violation: No {', '.join(missing)}"
+                status = "violation"
+                color = (0, 0, 255)
+            else:
+                final_label = "Safe: Full PPE"
+                color = (0, 255, 0)
+
+            # Zone Check
+            h_frame, w_frame = frame.shape[:2]
+            if y2 > h_frame * 0.8:
+                final_label = "Unauthorized: Danger Zone"
+                status = "violation"
+                color = (0, 0, 255)
+
+            if final_label in self.muted_labels:
+                continue
+
+            detections.append({"label": final_label, "confidence": p["conf"], "box": xyxy, "status": status})
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(frame, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 2)
+
+        # 4. RENDER OTHER ITEMS (Machinery, Phones)
+        for obj in ppe_boxes + other_phone_boxes:
+            label = obj["label"]
+            if label in ['hardhat', 'helmet', 'vest', 'safety vest', 'shoes', 'boots', 'gloves', 'person', 'no-hardhat', 'no-safety vest', 'no-mask', 'mask', 'safety cone']:
+                continue 
+                
+            xyxy = obj["box"]
+            x1, y1, x2, y2 = map(int, xyxy)
+            
             if label in ['machinery', 'vehicle', 'truck', 'car', 'excavator']:
                 final_label = f"Info: {label.title()} Active"
-                status = "safe" # Informational, completely bypassing PPE logic
-                color = (255, 165, 0) # Orange
-                
-            # PERSON logic
-            elif label == 'person':
-                # 1. Fall Detection
-                if w > h * 1.3:
-                    final_label = "Fall Risk: Person Down"
-                    status = "violation"
-                    color = (0, 0, 255)
-                else:
-                    if self.is_custom:
-                        # 2. PPE Detection via custom classes bounding boxes
-                        has_helmet = any(b["label"] in ["hardhat", "helmet"] and self.calculate_iou(xyxy, b["box"]) > 0.3 for b in raw_boxes)
-                        has_vest = any(b["label"] == "vest" and self.calculate_iou(xyxy, b["box"]) > 0.3 for b in raw_boxes)
-                        
-                        if not has_helmet and not has_vest:
-                            final_label = "Violation: No PPE"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        elif not has_helmet:
-                            final_label = "Violation: No Helmet"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        elif not has_vest:
-                            final_label = "Violation: No Vest"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        else:
-                            final_label = "Safe: PPE Correct"
-                            color = (0, 255, 0)
-                    else:
-                        # 2. Fallback heuristic PPE Detection (only for base yolov8n model)
-                        has_helmet = self.check_helmet_legacy(frame, xyxy)
-                        has_vest = self.check_vest_legacy(frame, xyxy)
-                        if not has_helmet and not has_vest:
-                            final_label = "Violation: No PPE"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        elif not has_helmet:
-                            final_label = "Violation: No Helmet"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        elif not has_vest:
-                            final_label = "Violation: No Vest"
-                            status = "violation"
-                            color = (0, 0, 255)
-                        else:
-                            final_label = "Safe: PPE Correct"
-
-                    # 3. Zone Detection
-                    h_frame, w_frame = frame.shape[:2]
-                    if y2 > h_frame * 0.8:
-                        final_label = "Unauthorized: Danger Zone"
-                        status = "violation"
-                        color = (0, 0, 255)
-            
-            # Unsafe items
+                status = "safe" 
+                color = (255, 165, 0)
             elif label == 'cell phone':
                 final_label = "Unsafe: Phone Usage"
                 status = "violation"
                 color = (0, 165, 255)
-
-            # Ignore rendering standalone PPE items unless as part of someone
-            if label in ['hardhat', 'helmet', 'vest', 'boots', 'glasses', 'gloves']:
+            else:
                 continue
 
-            # Skip safe generic objects to avoid clutter
-            if status == "safe" and final_label.lower() == label:
+            if final_label in self.muted_labels:
                 continue
 
-            detections.append({
-                "label": final_label,
-                "confidence": conf,
-                "box": xyxy,
-                "status": status
-            })
-            
+            detections.append({"label": final_label, "confidence": obj["conf"], "box": xyxy, "status": status})
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
         return detections, frame
-
-    def check_helmet_legacy(self, frame, xyxy):
-        x1, y1, x2, y2 = map(int, xyxy)
-        head_h = int((y2 - y1) / 5)
-        roi = frame[max(0,y1):min(frame.shape[0],y1+head_h), max(0,x1):min(frame.shape[1],x2)]
-        if roi.size == 0: return False
-        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
-        lower_yellow = np.array([20, 100, 100])
-        upper_yellow = np.array([30, 255, 255])
-        mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
-        _, bright = cv2.threshold(cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY)
-        return cv2.countNonZero(mask_yellow) > 20 or cv2.countNonZero(bright) > 40
-
-    def check_vest_legacy(self, frame, xyxy):
-        x1, y1, x2, y2 = map(int, xyxy)
-        h = y2 - y1
-        roi = frame[max(0,y1+int(h/4)):min(frame.shape[0],y1+int(h*3/4)), max(0,x1):min(frame.shape[1],x2)]
-        if roi.size == 0: return False
-        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
-        lower_orange = np.array([0, 100, 100])
-        upper_orange = np.array([15, 255, 255])
-        lower_neon = np.array([35, 100, 100])
-        upper_neon = np.array([85, 255, 255])
-        mask_o = cv2.inRange(hsv, lower_orange, upper_orange)
-        mask_n = cv2.inRange(hsv, lower_neon, upper_neon)
-        return cv2.countNonZero(mask_o) > 50 or cv2.countNonZero(mask_n) > 50

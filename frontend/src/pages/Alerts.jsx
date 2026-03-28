@@ -8,7 +8,7 @@ import ViolationDetails from './ViolationDetails';
 
 const Alerts = () => {
     const navigate = useNavigate();
-    const { alerts, refreshAlerts, isDeleting: contextIsDeleting } = useNotifications();
+    const { alerts, setAlerts, refreshAlerts, isDeleting: contextIsDeleting } = useNotifications();
     const [loading, setLoading] = useState(false); // Global sync is fast, skip local loading unless first load
     const [selectedAlertId, setSelectedAlertId] = useState(null);
     const [selectedIds, setSelectedIds] = useState(new Set());
@@ -36,7 +36,7 @@ const Alerts = () => {
                 next.delete(id);
                 return next;
             });
-            await refreshAlerts();
+            setAlerts(prev => prev.filter(a => a.id !== id));
         } catch (err) {
             console.error("Deletion failed:", err);
             const msg = err.response?.data?.detail || err.message || "Unknown Error";
@@ -53,8 +53,8 @@ const Alerts = () => {
         setLocalDeleting(true);
         try {
             await api.post('/alerts/delete-bulk', Array.from(selectedIds));
+            setAlerts(prev => prev.filter(a => !selectedIds.has(a.id)));
             setSelectedIds(new Set());
-            await refreshAlerts();
         } catch (err) {
             console.error("Deletion failed:", err);
             const msg = err.response?.data?.detail || err.message || "Unknown Error";
@@ -70,8 +70,8 @@ const Alerts = () => {
         setLocalDeleting(true);
         try {
             await api.post('/alerts/clear');
+            setAlerts([]);
             setSelectedIds(new Set());
-            await refreshAlerts();
         } catch (err) {
             console.error("Clear failed:", err);
             alert("Failed to clear log");

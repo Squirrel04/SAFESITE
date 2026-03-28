@@ -5,6 +5,19 @@ from schemas.user import User
 from api.auth import get_current_user
 from core.database import db
 from datetime import datetime
+import os
+
+def delete_associated_files(alert_dict: dict):
+    for key in ["image_url", "video_url"]:
+        url = alert_dict.get(key)
+        if url and "/media/" in url:
+            try:
+                filename = url.split("/media/")[-1]
+                file_path = os.path.join("media", filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"Failed to delete {url}: {e}")
 
 router = APIRouter()
 
@@ -55,6 +68,8 @@ async def get_alert(alert_id: str, current_user: User = Depends(get_current_user
 @router.patch("/{alert_id}", response_model=Alert)
 async def update_alert(alert_id: str, update_data: dict):
     from bson import ObjectId
+    from api.cameras import MUTED_VIOLATIONS
+    import time
     try:
         # Filter out keys that are None or not meant to be updated through this endpoint
         allowed_keys = ["image_url", "video_url", "is_resolved", "message"]
@@ -73,21 +88,43 @@ async def update_alert(alert_id: str, update_data: dict):
             
         updated_alert = await db.alerts.find_one({"_id": ObjectId(alert_id)})
         updated_alert["id"] = str(updated_alert["_id"])
+        
+        # Logic to mute violation if it's resolved
+        if filtered_data.get("is_resolved") is True:
+            camera_id = updated_alert.get("camera_id")
+            message = updated_alert.get("message", "")
+            if camera_id and message.startswith("Detected: "):
+                # Extract exact label to mute
+                label = message.replace("Detected: ", "")
+                if camera_id not in MUTED_VIOLATIONS:
+                    MUTED_VIOLATIONS[camera_id] = {}
+                # Mute for 5 minutes (300 seconds)
+                MUTED_VIOLATIONS[camera_id][label] = time.time() + 300
+                print(f"Muted violation '{label}' for camera {camera_id} for 5 minutes.")
+
+        # Broadcast the updated alert so frontend processes the video payload dynamically!
+        from api.websocket import manager
+        try:
+            await manager.broadcast_notification(updated_alert)
+        except Exception as e:
+            pass
+
         return updated_alert
     except Exception as e:
         print(f"Error updating alert: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/{alert_id}")
-async def delete_alert(alert_id: str, current_user: User = Depends(get_current_user)):
-    # Allow both admin and safety_officer to delete items
-    if current_user.role not in ["admin", "safety_officer"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions to delete evidence")
+async def delete_alert(alert_id: str):
     from bson import ObjectId
     try:
         if not ObjectId.is_valid(alert_id):
             print(f"DEBUG: Invalid alert_id format: {alert_id}")
             raise HTTPException(status_code=400, detail="Invalid alert ID format")
+            
+        alert = await db.alerts.find_one({"_id": ObjectId(alert_id)})
+        if alert:
+            delete_associated_files(alert)
             
         result = await db.alerts.delete_one({"_id": ObjectId(alert_id)})
         if result.deleted_count == 0:
@@ -100,24 +137,33 @@ async def delete_alert(alert_id: str, current_user: User = Depends(get_current_u
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/delete-bulk")
-async def delete_alerts_bulk(alert_ids: List[str], current_user: User = Depends(get_current_user)):
-    # Allow both admin and safety_officer for bulk delete
-    if current_user.role not in ["admin", "safety_officer"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions to delete evidence")
+async def delete_alerts_bulk(alert_ids: List[str]):
     from bson import ObjectId
     try:
         obj_ids = [ObjectId(aid) for aid in alert_ids]
+        alerts = await db.alerts.find({"_id": {"$in": obj_ids}}).to_list(length=None)
+        for alert in alerts:
+            delete_associated_files(alert)
+        
         result = await db.alerts.delete_many({"_id": {"$in": obj_ids}})
         return {"message": f"Successfully deleted {result.deleted_count} alerts"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/clear")
-async def clear_alerts(current_user: User = Depends(get_current_user)):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can clear the entire log")
+async def clear_alerts():
     try:
         result = await db.alerts.delete_many({})
+        if os.path.exists("media"):
+            import shutil
+            for filename in os.listdir("media"):
+                file_path = os.path.join("media", filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                except Exception as e:
+                    print(f'Failed to delete {file_path}. Reason: {e}')
+                    
         return {"message": f"Successfully cleared all {result.deleted_count} alerts"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -44,9 +44,10 @@ import aiohttp
 
 import aiohttp
 from collections import deque
+import uuid
 
 class SnapshotRecorder:
-    def __init__(self, fps=15, pre_roll=2, post_roll=3):
+    def __init__(self, fps=15, pre_roll=2, post_roll=3, camera_id="unknown"):
         self.fps = fps
         self.pre_roll_frames = int(fps * pre_roll)
         self.post_roll_frames = int(fps * post_roll)
@@ -55,6 +56,7 @@ class SnapshotRecorder:
         self.is_recording = False
         self.frames_left = 0
         self.last_filename = None
+        self.camera_id = camera_id
 
     def add_frame(self, frame):
         if not self.is_recording:
@@ -76,10 +78,12 @@ class SnapshotRecorder:
         if not self.recording_frames: return
         
         timestamp = int(time.time())
-        filename = f"snapshot_{timestamp}.mp4"
+        unique_id = str(uuid.uuid4())[:6]
+        filename = f"snapshot_{self.camera_id}_{timestamp}_{unique_id}.mp4"
         h, w = self.recording_frames[0].shape[:2]
         
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # 'avc1' corresponds to H.264, which is natively supported by web browsers
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         out = cv2.VideoWriter(filename, fourcc, self.fps, (w, h))
         for f in self.recording_frames:
             out.write(f)
@@ -127,12 +131,14 @@ async def stream_frames():
                     if current_time - last_status_check > 2.0:
                         last_status_check = current_time
                         try:
-                            camera_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
+                            camera_id_str = BACKEND_WS_URL.rstrip('/').split('/')[-1]
                             async with aiohttp.ClientSession() as session:
-                                async with session.get(f"{BACKEND_URL}/cameras/{camera_id}/status") as resp:
+                                async with session.get(f"{BACKEND_URL}/cameras/{camera_id_str}/status") as resp:
                                     if resp.status == 200:
                                         status_data = await resp.json()
                                         is_active = status_data.get("active", False)
+                                        if detector:
+                                            detector.muted_labels = status_data.get("muted_labels", [])
                         except Exception as e:
                             print(f"Failed to check camera status: {e}")
                             is_active = True
@@ -157,7 +163,9 @@ async def stream_frames():
                     # Detection
                     recorder = locals().get('recorder')
                     if recorder is None:
-                        recorder = SnapshotRecorder()
+                        # Extract real camera ID from websocket URL once during init
+                        cam_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
+                        recorder = SnapshotRecorder(camera_id=cam_id)
                         locals()['recorder'] = recorder
                     
                     recorder.add_frame(frame)
@@ -171,56 +179,58 @@ async def stream_frames():
                         try:
                             detections, annotated_frame = detector.detect(frame)
                             
-                            # Check for violations
+                            # Gather ALL distinct violations in the current frame safely
+                            current_violations = []
                             for d in detections:
                                 if d.get("status") == "violation":
-                                    current_frame_has_violation = True
-                                    violation_data = d
-                                    break # Found a violation, that's enough for status
+                                    current_violations.append(d)
                         except Exception as e:
                             print(f"Detection failed: {e}")
 
-                    # Logic: Play alert ONLY on rising edge (False -> True)
-                    # "OFF THE ALERT SOUND AFTER ONE BEEP IF NO VIOLATION IS SEEN"
-                    if current_frame_has_violation:
-                        if not is_violation_active:
-                            # Rising Edge: New violation episode detected
-                            print("Violation detected! Triggering alert.")
-                            is_violation_active = True
+                    # Logic: Generate distinct alerts for multiple simultaneous violations
+                    if current_violations:
+                        import threading
+                        import winsound
+                        
+                        img_saved = False
+                        camera_id_str = BACKEND_WS_URL.rstrip('/').split('/')[-1]
+                        unique_id = str(uuid.uuid4())[:6]
+                        temp_img_name = f"alert_still_{camera_id_str}_{int(time.time())}_{unique_id}.jpg"
+                        
+                        for v in current_violations:
+                            label = v['label']
                             
-                            # Play beep async (Once)
-                            import threading
-                            import winsound
+                            # Persistently attach last_alert_time tracking directly to the detector object
+                            if not hasattr(detector, 'last_alert_time'):
+                                detector.last_alert_time = {}
                             
-                            def play_alarm():
-                                try:
-                                    # 1000 Hz, 500 ms
-                                    winsound.Beep(1000, 500)
-                                except Exception:
-                                    pass
-                            
-                            threading.Thread(target=play_alarm, daemon=True).start()
+                            # Imposing a 10.0 second cooldown to prevent DB spam per identical violation class
+                            if time.time() - detector.last_alert_time.get(label, 0) > 10.0:
+                                print(f"New multi-class violation detected: {label}. Triggering distinct alert!.")
+                                detector.last_alert_time[label] = time.time()
+                                
+                                # Play beep async (Once)
+                                def play_alarm():
+                                    try:
+                                        winsound.Beep(1000, 500)
+                                    except Exception:
+                                        pass
+                                threading.Thread(target=play_alarm, daemon=True).start()
 
-                            # Save temporary high-quality image for storage
-                            temp_img_name = f"alert_still_{int(time.time())}.jpg"
-                            cv2.imwrite(temp_img_name, annotated_frame)
-
-                            # Trigger Snapshot
-                            recorder.start_recording()
-                            
-                            alert_payload = {
-                                "camera_id": "01",
-                                "alert_type": violation_data['label'].split(':')[0],
-                                "message": f"Detected: {violation_data['label']}",
-                                "severity": "high",
-                                "temp_image_path": temp_img_name # This will be handled in send_alert_async
-                            }
-                            asyncio.create_task(send_alert_async(alert_payload, recorder))
-                    else:
-                        # Falling Edge: Violation cleared
-                        if is_violation_active:
-                            print("Violation cleared. Resetting alert state.")
-                            is_violation_active = False
+                                # Validate we only overwrite/save the primary snapshot frame once per batch
+                                if not img_saved:
+                                    cv2.imwrite(temp_img_name, annotated_frame)
+                                    img_saved = True
+                                    recorder.start_recording()
+                                
+                                alert_payload = {
+                                    "camera_id": camera_id_str,
+                                    "alert_type": label.split(':')[0],
+                                    "message": f"Detected: {label}",
+                                    "severity": "high",
+                                    "temp_image_path": temp_img_name 
+                                }
+                                asyncio.create_task(send_alert_async(alert_payload, recorder))
 
                     # Encode frame to JPEG
                     options = [int(cv2.IMWRITE_JPEG_QUALITY), 70] # Lower quality for speed
