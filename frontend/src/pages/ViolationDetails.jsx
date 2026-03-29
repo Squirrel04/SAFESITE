@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Camera, MapPin, AlertTriangle, Shield, Download, Mail, CheckCircle, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const ViolationDetails = ({ id: propId, onClose }) => {
     const { id: paramsId } = useParams();
     const id = propId || paramsId;
     const navigate = useNavigate();
+    const reportRef = useRef(null);
     const [violation, setViolation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isResolving, setIsResolving] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const isModal = !!propId;
 
     // Mock data fallback if API fails or for demo
@@ -66,6 +70,35 @@ const ViolationDetails = ({ id: propId, onClose }) => {
         }
     };
 
+    const handleExportPDF = async () => {
+        if (!reportRef.current) return;
+        setIsExporting(true);
+        try {
+            const canvas = await html2canvas(reportRef.current, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#f8fafc',
+                logging: false,
+                onclone: (clonedDoc) => {
+                    const elementsToHide = clonedDoc.querySelectorAll('.no-export');
+                    elementsToHide.forEach(el => el.style.display = 'none');
+                }
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`SafeSite_Report_${id}.pdf`);
+        } catch (error) {
+            console.error("PDF Export failed:", error);
+            alert("Failed to generate PDF. Please try again.");
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
@@ -84,39 +117,40 @@ const ViolationDetails = ({ id: propId, onClose }) => {
     }
 
     return (
-        <div className={`space-y-6 max-w-7xl mx-auto ${isModal ? 'p-6 bg-slate-50/50 min-h-screen' : ''}`}>
+        <div ref={reportRef} className={`space-y-6 max-w-7xl mx-auto ${isModal ? 'p-6 bg-slate-50/50 min-h-screen' : ''}`}>
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between"
+                className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={onClose || (() => navigate('/alerts'))}
-                        className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200 shadow-sm hover:shadow"
+                        className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200 shadow-sm hover:shadow no-export"
                     >
                         {isModal ? <XCircle className="w-5 h-5 text-gray-600" /> : <ArrowLeft className="w-5 h-5 text-gray-600" />}
                     </button>
                     <div>
-                        <div className="flex items-center space-x-3">
-                            <h1 className="text-2xl font-bold text-gray-900">Incident Report #{violation.id}</h1>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getSeverityColor(violation.severity)}`}>
-                                {violation.severity} Severity
-                            </span>
-                        </div>
-                        <p className="text-gray-500 text-sm mt-1">Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</p>
+                        <h1 className="text-xl font-bold text-slate-900 leading-tight">
+                            Incident Ref: <span className="text-cyan-600">#{id.slice(-6).toUpperCase()}</span>
+                        </h1>
+                        <p className="text-xs text-slate-500 font-medium tracking-tight">Safety Violation Intelligence Report</p>
                     </div>
                 </div>
 
-                <div className="flex space-x-3">
-                    <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition-colors">
-                        <Download className="w-4 h-4 mr-2" />
-                        Export PDF
-                    </button>
-                    <button className="flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg shadow-md shadow-cyan-600/20 font-medium transition-colors">
-                        <Mail className="w-4 h-4 mr-2" />
-                        Email Report
+                <div className="flex space-x-3 no-export">
+                    <button 
+                        onClick={handleExportPDF}
+                        disabled={isExporting}
+                        className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition-colors disabled:opacity-50"
+                    >
+                        {isExporting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-600 mr-2"></div>
+                        ) : (
+                            <Download className="w-4 h-4 mr-2" />
+                        )}
+                        {isExporting ? 'Exporting...' : 'Export PDF'}
                     </button>
                 </div>
             </motion.div>
@@ -137,7 +171,7 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                             </h2>
                             <div className="flex gap-2">
                                 <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">CAM: {violation.camera_id}</span>
-                                {violation.video_url && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />Video Evidence</span>}
+                                {violation.video_url && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center no-export"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />Video Evidence</span>}
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200">
@@ -162,7 +196,7 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                             </div>
 
                             {/* Video Evidence */}
-                            <div className="aspect-video bg-gray-950 relative overflow-hidden group">
+                            <div className="aspect-video bg-gray-950 relative overflow-hidden group no-export">
                                 {violation.video_url ? (
                                     <video
                                         src={violation.video_url}
@@ -258,10 +292,6 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                                     <CheckCircle className="w-4 h-4 mr-2" />
                                 )}
                                 {violation.status === 'Resolved' ? 'Resolved / Muted' : 'Acknowledge & Resolve'}
-                            </button>
-                            <button className="w-full flex items-center justify-center px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors font-medium text-sm">
-                                <XCircle className="w-4 h-4 mr-2 text-gray-400" />
-                                Mark as False Positive
                             </button>
                         </div>
                     </div>

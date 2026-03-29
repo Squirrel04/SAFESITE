@@ -106,6 +106,10 @@ async def stream_frames():
 
     cap = open_camera(CAMERA_SOURCE)
     
+    # Initialize recorder ONCE outside loop to maintain state across frames
+    cam_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
+    recorder = SnapshotRecorder(camera_id=cam_id, fps=15)
+
     # State for tracking violation persistence
     is_violation_active = False
 
@@ -160,14 +164,6 @@ async def stream_frames():
                             await asyncio.sleep(1)
                             continue
 
-                    # Detection
-                    recorder = locals().get('recorder')
-                    if recorder is None:
-                        # Extract real camera ID from websocket URL once during init
-                        cam_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
-                        recorder = SnapshotRecorder(camera_id=cam_id)
-                        locals()['recorder'] = recorder
-                    
                     recorder.add_frame(frame)
                     
                     annotated_frame = frame
