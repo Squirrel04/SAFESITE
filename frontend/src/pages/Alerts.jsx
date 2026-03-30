@@ -185,13 +185,13 @@ const Alerts = () => {
                                 <tr><td colSpan="7" className="p-8 text-center text-slate-500 font-medium tracking-wide">No violations recorded.</td></tr>
                             ) : (
                                 alerts.map((alert, index) => (
+                                    <React.Fragment key={alert.id}>
                                     <motion.tr
-                                        key={alert.id}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                         className={`hover:bg-slate-800/30 transition-colors group cursor-pointer ${selectedIds.has(alert.id) ? 'bg-cyan-500/5' : ''}`}
-                                        onClick={() => setSelectedAlertId(alert.id)}
+                                        onClick={() => setSelectedAlertId(selectedAlertId === alert.id ? null : alert.id)}
                                     >
                                         <td className="p-5" onClick={(e) => e.stopPropagation()}>
                                             <input 
@@ -254,7 +254,7 @@ const Alerts = () => {
                                          <td className="p-5 text-right">
                                             <div className="flex items-center justify-end space-x-2">
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); setSelectedAlertId(alert.id); }}
+                                                    onClick={(e) => { e.stopPropagation(); setSelectedAlertId(selectedAlertId === alert.id ? null : alert.id); }}
                                                     className="px-3 py-1.5 bg-slate-800/80 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border border-slate-700 hover:border-cyan-500/30 flex items-center shadow-sm"
                                                 >
                                                     <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -268,46 +268,36 @@ const Alerts = () => {
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
-                                        </td>
-                                    </motion.tr>
+                                        </td >
+                                    </motion.tr >
+                                    
+                                    {/* Expanded Row for Evidence Snapshots */}
+                                    <AnimatePresence>
+                                        {selectedAlertId === alert.id && (
+                                            <motion.tr
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="bg-slate-950/50 border-b border-slate-700/50"
+                                            >
+                                                <td colSpan="7" className="p-0">
+                                                    <div className="p-6 border-l-2 border-cyan-500 overflow-hidden shadow-inner bg-slate-900/80">
+                                                        <ViolationDetails 
+                                                            id={alert.id} 
+                                                            onClose={() => setSelectedAlertId(null)} 
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        )}
+                                    </AnimatePresence>
+                                    </React.Fragment>
                                 ))
                             )}
                         </tbody>
                     </table>
                 </div>
             </motion.div>
-
-            {/* Violation Details Modal Overlay */}
-            <AnimatePresence>
-                {selectedAlertId && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 overflow-hidden"
-                    >
-                        {/* Full-screen Backdrop */}
-                        <div 
-                            className="fixed inset-0 bg-slate-950/90 backdrop-blur-md"
-                            onClick={() => setSelectedAlertId(null)}
-                        />
-                        
-                        {/* Modal Content */}
-                        <motion.div 
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl border border-slate-200 custom-scrollbar"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <ViolationDetails 
-                                id={selectedAlertId} 
-                                onClose={() => setSelectedAlertId(null)} 
-                            />
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, Camera, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, Camera, Settings, LogOut, Brain } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 import { useNotifications } from '../context/NotificationContext';
@@ -15,19 +15,19 @@ const Sidebar = () => {
         { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/alerts', icon: AlertTriangle, label: 'Evidence' },
         { path: '/cameras', icon: Camera, label: 'Cameras' },
+        { path: '/review', icon: Brain, label: 'Intelligence' },
     ];
 
     return (
         <div className="h-screen w-64 bg-slate-900/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
             {/* Brand */}
             <div className="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/20">
-                <div className="w-10 h-10 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl mr-3 shadow-lg shadow-cyan-500/20 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
+                <div className="w-10 h-10 bg-indigo-600 rounded-xl mr-3 shadow-lg flex items-center justify-center relative overflow-hidden">
                     <Camera className="w-5 h-5 text-white" />
                 </div>
                 <div>
                     <h1 className="text-xl font-bold text-white tracking-tight">SafeSite</h1>
-                    <p className="text-[10px] text-cyan-400 tracking-wider font-mono uppercase">Monitor Pro</p>
+                    <p className="text-[10px] text-slate-500 tracking-wider font-semibold uppercase">Monitor Pro</p>
                 </div>
             </div>
 
@@ -39,7 +39,7 @@ const Sidebar = () => {
                         to={item.path}
                         className={({ isActive }) =>
                             `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative ${isActive
-                                ? 'bg-cyan-500/10 text-cyan-400 shadow-sm border border-cyan-500/20'
+                                ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/30'
                                 : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
                             }`
                         }
@@ -47,9 +47,9 @@ const Sidebar = () => {
                         {({ isActive }) => (
                             <>
                                 {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-500 rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-r-full" />
                                 )}
-                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-cyan-400' : 'group-hover:text-slate-300'}`} />
+                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-indigo-400' : 'group-hover:text-slate-300'}`} />
                                 <span className={`text-sm font-medium tracking-wide ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
                             </>
                         )}
@@ -61,7 +61,7 @@ const Sidebar = () => {
             <div className="flex-1 flex flex-col min-h-0 border-t border-slate-800/50">
                 <div className="px-6 py-4 flex items-center justify-between">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Recent Alerts</h2>
-                    <Bell className="w-3 h-3 text-cyan-500/50" />
+                    <Bell className="w-3 h-3 text-indigo-500/50" />
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 space-y-2 pb-6 custom-scrollbar">
                     {alerts.length === 0 ? (

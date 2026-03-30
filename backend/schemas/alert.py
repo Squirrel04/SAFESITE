@@ -11,6 +11,10 @@ class AlertBase(BaseModel):
     image_url: Optional[str] = None
     video_url: Optional[str] = None
     is_resolved: bool = False
+    source: Optional[str] = "YOLO"  # YOLO or LLM
+    confidence: Optional[float] = 0.0
+    reasoning: Optional[str] = None
+    recommendation: Optional[str] = None
 
 class AlertCreate(AlertBase):
     pass

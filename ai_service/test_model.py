@@ -26,9 +26,7 @@ def main():
         f.write(f"Testing source: {CAMERA_SOURCE}\n")
         
         frame_count = 0
-        max_frames = 100 # Test on first 100 frames
-        
-        while frame_count < max_frames:
+        while True:
             ret, frame = cap.read()
             if not ret:
                 print("End of video or read error.")

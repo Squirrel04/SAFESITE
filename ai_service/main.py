@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-CAMERA_SOURCE = os.getenv("CAMERA_SOURCE", "test_safety.mp4") # Default to test video
+CAMERA_SOURCE = os.getenv("CAMERA_SOURCE", "testfinal.mp4") # Default to test final video
 
 def open_camera(source):
     """Attempt to open a camera source with fallback strategies."""
@@ -108,7 +108,7 @@ async def stream_frames():
     
     # Initialize recorder ONCE outside loop to maintain state across frames
     cam_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
-    recorder = SnapshotRecorder(camera_id=cam_id, fps=15)
+    recorder = SnapshotRecorder(camera_id=cam_id, fps=30)
 
     # State for tracking violation persistence
     is_violation_active = False
@@ -154,6 +154,10 @@ async def stream_frames():
                         await asyncio.sleep(0.5)
                         continue
 
+                    # 6x Speed Simulation: Skip 5 frames between each processed frame
+                    for _ in range(5):
+                        cap.grab()
+                    
                     ret, frame = cap.read()
                     if not ret:
                         if not CAMERA_SOURCE.isdigit() and cap.get(cv2.CAP_PROP_FRAME_COUNT) > 0:
@@ -168,6 +172,7 @@ async def stream_frames():
                     
                     annotated_frame = frame
                     detections = []
+                    current_violations = []
                     current_frame_has_violation = False
                     violation_data = None
 
@@ -176,7 +181,6 @@ async def stream_frames():
                             detections, annotated_frame = detector.detect(frame)
                             
                             # Gather ALL distinct violations in the current frame safely
-                            current_violations = []
                             for d in detections:
                                 if d.get("status") == "violation":
                                     current_violations.append(d)
@@ -224,7 +228,10 @@ async def stream_frames():
                                     "alert_type": label.split(':')[0],
                                     "message": f"Detected: {label}",
                                     "severity": "high",
-                                    "temp_image_path": temp_img_name 
+                                    "temp_image_path": temp_img_name,
+                                    "source": v.get("source", "YOLO"),
+                                    "confidence": v.get("confidence", 0.0),
+                                    "reasoning": v.get("reasoning", None)
                                 }
                                 asyncio.create_task(send_alert_async(alert_payload, recorder))
 
@@ -246,7 +253,8 @@ async def stream_frames():
                         last_fps_log = current_time
                         print(f"Streaming at {fps:.2f} FPS (Process time: {process_time*1000:.1f}ms per frame)")
 
-                    await asyncio.sleep(max(0, 0.06 - process_time)) # Target ~15 FPS (more stable)
+                    # Optimized for maximum hardware throughput
+                    await asyncio.sleep(0.001)
 
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError) as e:
             print(f"Connection lost or refused: {e}. Retrying in 5 seconds...")

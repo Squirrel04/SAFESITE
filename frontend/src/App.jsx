@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Alerts from './pages/Alerts';
 import ViolationDetails from './pages/ViolationDetails';
 import Cameras from './pages/Cameras';
+import TechnicalReview from './pages/TechnicalReview';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ function App() {
               <Route path="alerts" element={<Alerts />} />
               <Route path="violation/:id" element={<ViolationDetails />} />
               <Route path="cameras" element={<Cameras />} />
+              <Route path="review" element={<TechnicalReview />} />
             </Route>
           </Routes>
         </NotificationProvider>

@@ -1,1 +1,0 @@
-[{"_id": {"$oid": "6991a4e05527b637a31b7edc"}, "username": "safesite03", "email": "safesite50@gmail.com", "role": "safety_officer", "hashed_password": "$2b$12$yo.PdZVQxthAfKeXt3T5PenxC.MAmPeJjlgzdzMsR7BRlz6wH1BhS"}]

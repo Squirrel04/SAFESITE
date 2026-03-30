@@ -52,3 +52,14 @@ frontend/.env.local
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated media / snapshots (large binary files)
+ai_service/snapshot_*.mp4
+ai_service/alert_still_*.jpg
+backend/media/
+
+# ML model weights
+ai_service/*.pt
+
+# Seed / debug scripts
+backend/seed_alerts.py

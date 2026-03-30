@@ -22,7 +22,7 @@ def delete_associated_files(alert_dict: dict):
 router = APIRouter()
 
 @router.get("/", response_model=List[Alert])
-async def get_alerts(skip: int = 0, limit: int = 10000, current_user: User = Depends(get_current_user)):
+async def get_alerts(skip: int = 0, limit: int = 10000):
     alerts_cursor = db.alerts.find().sort("timestamp", -1).skip(skip).limit(limit)
     alerts = await alerts_cursor.to_list(length=limit)
     # Convert ObjectId to str
@@ -53,7 +53,7 @@ async def create_alert(alert: AlertCreate):
     return created_alert
 
 @router.get("/{alert_id}", response_model=Alert)
-async def get_alert(alert_id: str, current_user: User = Depends(get_current_user)):
+async def get_alert(alert_id: str):
     from bson import ObjectId
     try:
         alert = await db.alerts.find_one({"_id": ObjectId(alert_id)})

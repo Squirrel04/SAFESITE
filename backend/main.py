@@ -9,6 +9,15 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title=settings.PROJECT_NAME, version="1.0.0")
 
+# CORS must be registered BEFORE routes
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(alerts_router, prefix="/alerts", tags=["alerts"])
 app.include_router(cameras_router, prefix="/cameras", tags=["cameras"])
@@ -69,14 +78,7 @@ async def websocket_endpoint_client(websocket: WebSocket, camera_id: str):
     except WebSocketDisconnect:
         manager.disconnect_client(websocket, camera_id)
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # TODO: Restrict in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# (CORS middleware registered at top of file)
 
 @app.get("/")
 def root():

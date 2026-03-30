@@ -5,6 +5,7 @@ const NotificationContext = createContext(null);
 
 export const NotificationProvider = ({ children }) => {
     const [alerts, setAlerts] = useState([]);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         const fetchInitialAlerts = async () => {
@@ -69,7 +70,7 @@ export const NotificationProvider = ({ children }) => {
     };
 
     return (
-        <NotificationContext.Provider value={{ alerts, dismissAlert, refreshAlerts, setAlerts }}>
+        <NotificationContext.Provider value={{ alerts, dismissAlert, refreshAlerts, setAlerts, isDeleting, setIsDeleting }}>
             {children}
         </NotificationContext.Provider>
     );

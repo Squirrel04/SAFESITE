@@ -28,7 +28,9 @@ const ViolationDetails = ({ id: propId, onClose }) => {
         status: 'Open',
         description: 'Individual detected without required safety helmet in hazardous zone.',
         person_id: 'Unknown',
-        confidence: '98%'
+        confidence: '98%',
+        image_url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800',
+        video_url: null
     };
 
     useEffect(() => {
@@ -51,10 +53,10 @@ const ViolationDetails = ({ id: propId, onClose }) => {
 
     const getSeverityColor = (severity) => {
         switch (severity?.toLowerCase()) {
-            case 'high': return 'text-red-600 bg-red-50 border-red-200';
-            case 'medium': return 'text-orange-600 bg-orange-50 border-orange-200';
-            case 'low': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-            default: return 'text-gray-600 bg-gray-50 border-gray-200';
+            case 'high': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+            case 'medium': return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+            case 'low': return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
+            default: return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
         }
     };
 
@@ -74,10 +76,20 @@ const ViolationDetails = ({ id: propId, onClose }) => {
         if (!reportRef.current) return;
         setIsExporting(true);
         try {
+            // Wait for images to be loaded
+            const images = reportRef.current.querySelectorAll('img');
+            await Promise.all(Array.from(images).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+            }));
+
             const canvas = await html2canvas(reportRef.current, {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#0f172a', // Slate-900 for dark mode export
                 logging: false,
                 onclone: (clonedDoc) => {
                     const elementsToHide = clonedDoc.querySelectorAll('.no-export');
@@ -90,7 +102,7 @@ const ViolationDetails = ({ id: propId, onClose }) => {
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
             
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`SafeSite_Report_${id}.pdf`);
+            pdf.save(`SafeSite_Report_${id.slice(-6).toUpperCase()}.pdf`);
         } catch (error) {
             console.error("PDF Export failed:", error);
             alert("Failed to generate PDF. Please try again.");
@@ -102,7 +114,7 @@ const ViolationDetails = ({ id: propId, onClose }) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
             </div>
         );
     }
@@ -110,14 +122,14 @@ const ViolationDetails = ({ id: propId, onClose }) => {
     if (!violation) {
         return (
             <div className="text-center py-20">
-                <h2 className="text-2xl font-bold text-gray-900">Violation Not Found</h2>
-                <button onClick={() => navigate('/alerts')} className="mt-4 text-cyan-600 hover:underline">Return to Logs</button>
+                <h2 className="text-2xl font-bold text-white">Violation Not Found</h2>
+                <button onClick={() => navigate('/alerts')} className="mt-4 text-indigo-400 hover:underline">Return to Logs</button>
             </div>
         );
     }
 
     return (
-        <div ref={reportRef} className={`space-y-6 max-w-7xl mx-auto ${isModal ? 'p-6 bg-slate-50/50 min-h-screen' : ''}`}>
+        <div ref={reportRef} className={`space-y-6 max-w-7xl mx-auto p-2 ${isModal ? 'p-6 bg-slate-900 min-h-screen' : ''}`}>
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -127,15 +139,15 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={onClose || (() => navigate('/alerts'))}
-                        className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200 shadow-sm hover:shadow no-export"
+                        className="p-3 bg-slate-800/50 hover:bg-slate-800 rounded-2xl transition-all border border-slate-700/50 shadow-xl no-export"
                     >
-                        {isModal ? <XCircle className="w-5 h-5 text-gray-600" /> : <ArrowLeft className="w-5 h-5 text-gray-600" />}
+                        {isModal ? <XCircle className="w-5 h-5 text-slate-400" /> : <ArrowLeft className="w-5 h-5 text-slate-400" />}
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900 leading-tight">
-                            Incident Ref: <span className="text-cyan-600">#{id.slice(-6).toUpperCase()}</span>
+                        <h1 className="text-2xl font-black text-white leading-tight tracking-tighter italic">
+                            Incident Ref: <span className="text-indigo-400">#{id.slice(-6).toUpperCase()}</span>
                         </h1>
-                        <p className="text-xs text-slate-500 font-medium tracking-tight">Safety Violation Intelligence Report</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Safety Violation Intelligence Report</p>
                     </div>
                 </div>
 
@@ -143,14 +155,14 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     <button 
                         onClick={handleExportPDF}
                         disabled={isExporting}
-                        className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition-colors disabled:opacity-50"
+                        className="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl shadow-indigo-500/20 font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50"
                     >
                         {isExporting ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cyan-600 mr-2"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         ) : (
                             <Download className="w-4 h-4 mr-2" />
                         )}
-                        {isExporting ? 'Exporting...' : 'Export PDF'}
+                        {isExporting ? 'Exporting...' : 'Export Report'}
                     </button>
                 </div>
             </motion.div>
@@ -163,73 +175,82 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     transition={{ delay: 0.1 }}
                     className="lg:col-span-2 space-y-6"
                 >
-                    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h2 className="font-semibold text-gray-900 flex items-center text-sm">
-                                <Camera className="w-4 h-4 mr-2 text-cyan-600" />
+                    <div className="bg-slate-900 rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/20 backdrop-blur-md">
+                            <h2 className="font-bold text-white flex items-center text-xs uppercase tracking-widest leading-none">
+                                <Camera className="w-4 h-4 mr-3 text-indigo-400" />
                                 Visual Evidence Log
                             </h2>
                             <div className="flex gap-2">
-                                <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-md uppercase tracking-wider">CAM: {violation.camera_id}</span>
-                                {violation.video_url && <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center no-export"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />Video Evidence</span>}
+                                <span className="text-[10px] font-black text-slate-400 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full uppercase tracking-widest">CAM: {violation.camera_id}</span>
+                                {violation.video_url && <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full uppercase tracking-widest flex items-center no-export"><div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5 animate-pulse" />Video Source</span>}
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-800">
                             {/* Snapshot Image */}
-                            <div className="aspect-video bg-gray-950 relative overflow-hidden group">
+                            <div className="aspect-video bg-black relative overflow-hidden group">
                                 {violation.image_url ? (
                                     <img
-                                        src={violation.image_url}
+                                        src={violation.image_url.startsWith('http') ? violation.image_url : `http://localhost:8000${violation.image_url}`}
                                         alt="Evidence Snapshot"
-                                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        crossOrigin="anonymous"
+                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-105"
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center h-full text-slate-500">
                                         <Camera className="w-10 h-10 mb-2 opacity-20" />
-                                        <p className="text-xs font-medium uppercase tracking-widest opacity-40 leading-none">Still Snapshot</p>
-                                        <p className="text-[10px] opacity-30 mt-1">Unavailable</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest opacity-40">Still Snapshot</p>
+                                        <p className="text-[10px] opacity-30 mt-1 italic tracking-[0.2em]">Unavailable</p>
                                     </div>
                                 )}
-                                <div className="absolute top-3 left-3">
-                                    <span className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded border border-white/10 uppercase tracking-widest">Snapshot</span>
+                                <div className="absolute top-4 left-4">
+                                    <span className="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-3 py-1 rounded-full border border-white/10 uppercase tracking-[0.2em]">Static_Still</span>
                                 </div>
                             </div>
 
                             {/* Video Evidence */}
-                            <div className="aspect-video bg-gray-950 relative overflow-hidden group no-export">
+                            <div className="aspect-video bg-black relative overflow-hidden group no-export">
                                 {violation.video_url ? (
                                     <video
-                                        src={violation.video_url}
+                                        src={violation.video_url.startsWith('http') ? violation.video_url : `http://localhost:8000${violation.video_url}`}
                                         controls
                                         className="w-full h-full object-cover"
                                         poster={violation.image_url}
                                     />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center h-full text-slate-500 italic">
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
                                         <div className="relative">
-                                            <AlertTriangle className="w-10 h-10 mb-2 opacity-20" />
+                                            <AlertTriangle className="w-10 h-10 mb-2 opacity-20 text-rose-500" />
                                             <div className="absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full animate-ping" />
                                         </div>
-                                        <p className="text-xs font-medium uppercase tracking-widest opacity-40 leading-none">Video Evidence</p>
-                                        <p className="text-[10px] opacity-30 mt-1">Processing Clip...</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest opacity-40 leading-none">Live Playback</p>
+                                        <p className="text-[10px] opacity-30 mt-1 italic tracking-[0.2em]">Syndicating Clip...</p>
                                     </div>
                                 )}
-                                <div className="absolute top-3 left-3">
-                                    <span className="bg-rose-600/80 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded border border-white/10 uppercase tracking-widest flex items-center">
-                                        <div className="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-pulse" /> Recording
+                                <div className="absolute top-4 left-4">
+                                    <span className="bg-rose-600/80 backdrop-blur-md text-white text-[9px] font-bold px-3 py-1 rounded-full border border-white/10 uppercase tracking-[0.2em] flex items-center">
+                                        <div className="w-1.5 h-1.5 bg-white rounded-full mr-2 animate-pulse" /> Recording
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                        <h2 className="font-semibold text-gray-900 mb-4">Incident Description</h2>
-                        <p className="text-gray-600 leading-relaxed">
-                            {violation.description}
-                            <br /><br />
-                            This event was automatically flagged by the SafeSite AI Surveillance System. Manual review is recommended to confirm the violation and proceed with safety protocol enforcement.
-                        </p>
+                    <div className="bg-slate-900 rounded-[2.5rem] border border-slate-800 p-8 shadow-2xl">
+                        <h2 className="text-lg font-black text-white italic tracking-tighter uppercase mb-6 flex items-center">
+                            <Shield className="w-5 h-5 mr-3 text-indigo-400" /> Incident Semantic breakdown
+                        </h2>
+                        <div className="space-y-6 text-slate-400 text-sm leading-relaxed font-medium">
+                            <p>
+                                {violation.description || 'System reasoning: Individual detected with behavioral anomalies or missing PPE equipment in high-risk zones.'}
+                            </p>
+                            <div className="p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-3xl">
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">AI Recommendation</p>
+                                <p className="text-slate-300 text-sm italic">
+                                    {violation.recommendation || "Immediate safety protocol enforcement required. Site supervisor should verify worker's certification and PPE compliance before continuing tasks."}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </motion.div>
 
@@ -241,33 +262,33 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     className="space-y-6"
                 >
                     {/* Key Details Card */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-4 bg-gray-50 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900">Incident Details</h3>
+                    <div className="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden">
+                        <div className="p-6 bg-slate-800/20 border-b border-slate-800 backdrop-blur-md">
+                            <h3 className="font-bold text-white text-xs uppercase tracking-[0.2em]">Incident Details</h3>
                         </div>
-                        <div className="p-4 space-y-4">
+                        <div className="p-6 space-y-6">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Violation Type</label>
-                                <p className="text-gray-900 font-medium mt-1">{violation.alert_type}</p>
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Violation Type</label>
+                                <p className="text-white font-bold mt-2 text-lg tracking-tight italic">{violation.alert_type}</p>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</label>
-                                <div className="flex items-center mt-1 text-gray-700">
-                                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Location</label>
+                                <div className="flex items-center mt-2 text-slate-300 font-bold">
+                                    <MapPin className="w-4 h-4 mr-2 text-indigo-400" />
                                     {violation.location}
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Time</label>
-                                <div className="flex items-center mt-1 text-gray-700">
-                                    <Calendar className="w-4 h-4 mr-1 text-gray-400" />
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Time Registered</label>
+                                <div className="flex items-center mt-2 text-slate-300 font-bold">
+                                    <Calendar className="w-4 h-4 mr-2 text-indigo-400" />
                                     {new Date(violation.timestamp).toLocaleString()}
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</label>
-                                <div className="mt-1">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Operational Status</label>
+                                <div className="mt-2">
+                                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${violation.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
                                         {violation.status}
                                     </span>
                                 </div>
@@ -276,22 +297,22 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     </div>
 
                     {/* Action Card */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="p-4 bg-gray-50 border-b border-gray-200">
-                            <h3 className="font-semibold text-gray-900">Resolution Actions</h3>
+                    <div className="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden">
+                        <div className="p-6 bg-slate-800/20 border-b border-slate-800 backdrop-blur-md">
+                            <h3 className="font-bold text-white text-xs uppercase tracking-[0.2em]">Resolution Bridge</h3>
                         </div>
-                        <div className="p-4 space-y-3">
+                        <div className="p-6 space-y-4">
                             <button 
                                 onClick={handleResolve}
                                 disabled={isResolving || violation.status === 'Resolved'}
-                                className={`w-full flex items-center justify-center px-4 py-2 ${violation.status === 'Resolved' ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20'} rounded-xl transition-colors font-medium text-sm`}
+                                className={`w-full flex items-center justify-center px-6 py-4 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${violation.status === 'Resolved' ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-500/20'}`}
                             >
                                 {isResolving ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
                                 ) : (
-                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    <CheckCircle className="w-4 h-4 mr-3" />
                                 )}
-                                {violation.status === 'Resolved' ? 'Resolved / Muted' : 'Acknowledge & Resolve'}
+                                {violation.status === 'Resolved' ? 'Incident Archived' : 'Enforce & Resolve'}
                             </button>
                         </div>
                     </div>

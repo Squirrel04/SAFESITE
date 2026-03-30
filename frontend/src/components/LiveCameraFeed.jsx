@@ -15,6 +15,7 @@ const LiveCameraFeed = ({ id, location }) => {
         const wsUrl = `ws://localhost:8000/ws/stream/client/${id}`;
 
         const ws = new WebSocket(wsUrl);
+        ws.binaryType = 'blob';
         wsRef.current = ws;
 
         ws.onopen = () => {

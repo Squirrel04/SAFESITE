@@ -2,14 +2,14 @@ import React from 'react';
 
 const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan', onClick }) => {
     const colorClasses = {
-        cyan: 'from-cyan-500 to-blue-500 shadow-cyan-500/20 text-cyan-400',
-        rose: 'from-rose-500 to-orange-500 shadow-rose-500/20 text-rose-400',
-        violet: 'from-violet-500 to-purple-500 shadow-violet-500/20 text-violet-400',
-        emerald: 'from-emerald-500 to-teal-500 shadow-emerald-500/20 text-emerald-400',
-        yellow: 'from-yellow-400 to-orange-500 shadow-yellow-500/20 text-yellow-400',
+        indigo: 'from-indigo-600 to-blue-600 text-indigo-400',
+        rose: 'from-rose-600 to-orange-600 text-rose-400',
+        slate: 'from-slate-700 to-slate-800 text-slate-400',
+        emerald: 'from-emerald-600 to-teal-600 text-emerald-400',
+        blue: 'from-blue-600 to-indigo-600 text-blue-400',
     };
 
-    const gradientClass = colorClasses[color] || colorClasses['cyan'];
+    const gradientClass = colorClasses[color] || colorClasses['indigo'];
     const textClass = gradientClass.split(' ').find(c => c.startsWith('text-'));
 
     return (
@@ -27,8 +27,8 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan', onClick }) 
                 </div>
             </div>
 
-            {/* Glowing background blob */}
-            <div className={`absolute -right-8 -top-8 w-32 h-32 bg-gradient-to-br ${gradientClass} opacity-10 blur-[40px] rounded-full group-hover:opacity-30 group-hover:-translate-x-4 group-hover:translate-y-4 transition-all duration-500`}></div>
+            {/* Background decorative element (hidden for non-neon look) */}
+            <div className="hidden"></div>
 
             {trend !== undefined && (
                 <div className="mt-6 flex items-center text-sm relative z-10">

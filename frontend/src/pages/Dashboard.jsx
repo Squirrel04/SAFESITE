@@ -46,7 +46,7 @@ const Dashboard = () => {
             title: 'Total Alerts', 
             value: alerts.length, 
             icon: AlertTriangle, 
-            color: 'rose', 
+            color: 'indigo', 
             trend: 15,
             onClick: () => navigate('/alerts')
         },
@@ -54,7 +54,7 @@ const Dashboard = () => {
             title: 'Active Cameras', 
             value: `${statsData.active_cameras || 0}/${statsData.total_cameras || 2}`, 
             icon: Camera, 
-            color: 'cyan', 
+            color: 'blue', 
             trend: 0,
             onClick: () => navigate('/cameras')
         },
@@ -74,7 +74,7 @@ const Dashboard = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative group">
+                    <div className="p-3 bg-gradient-to-tr from-indigo-500 to-blue-600 rounded-2xl shadow-xl relative group">
                         <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
                         <Shield className="w-8 h-8 text-white relative z-10" />
                     </div>
@@ -112,7 +112,7 @@ const Dashboard = () => {
                 >
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
-                            <Camera className="w-5 h-5 mr-3 text-cyan-400" />
+                            <Camera className="w-5 h-5 mr-3 text-indigo-400" />
                             Live Feeds
                         </h2>
                         <button className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors font-semibold tracking-wide uppercase">View All</button>
@@ -139,7 +139,7 @@ const Dashboard = () => {
                     </h2>
                     <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 h-[400px] shadow-xl relative overflow-hidden group">
                         {/* Background glow for chart */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-violet-500/10 blur-[60px] rounded-full pointer-events-none group-hover:bg-violet-500/20 transition-all duration-700" />
+                        <div className="hidden" />
                         
                         <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                             <AreaChart data={chartData}>

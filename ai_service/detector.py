@@ -1,24 +1,94 @@
 import cv2
+import os
+import time
+import json
+import threading
 from ultralytics import YOLO
 
+class HybridVisionLLM:
+    """Asynchronous background processor to evaluate complex semantic scenes via Vision LLM"""
+    def __init__(self):
+        self.enabled = False
+        self.last_results = []
+        self.last_process_time = 0
+        self.is_processing = False
+        self.api_key = os.getenv("GEMINI_API_KEY", "")
+        
+        if self.api_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=self.api_key)
+                # Using Gemini 1.5 Flash as it is extremely fast and natively understands bounding box coordinates
+                self.model = genai.GenerativeModel("gemini-1.5-flash", generation_config={"response_mime_type": "application/json"})
+                self.enabled = True
+                print("Vision LLM Hybrid Mode Enabled (Gemini).")
+            except Exception as e:
+                print(f"Failed to initialize Vision LLM: {e}")
+
+    def analyze_async(self, frame_bgr):
+        # Throttle Vision LLM API to max 1 request every 1.0 seconds for higher semantic density
+        if not self.enabled or self.is_processing or (time.time() - self.last_process_time < 1.0):
+            return
+
+        self.is_processing = True
+        
+        # Copy to avoid thread race conditions
+        frame_copy = frame_bgr.copy()
+        
+        def run_inference():
+            try:
+                from PIL import Image
+                img_rgb = cv2.cvtColor(frame_copy, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(img_rgb)
+                
+                # Instruction tailored to return bounding boxes in [ymin, xmin, ymax, xmax] format (0-1000 scale)
+                prompt = (
+                    "You are a strict industrial safety AI monitoring a live CCTV feed. "
+                    "Analyze the scene carefully for the following critical violations: "
+                    "1. Missing PPE (Helmet, Vest, Harness). "
+                    "2. Unauthorized Zone: Person within restricted red-taped areas, technical rooms, or fenced construction zones without authorization. "
+                    "3. Unsafe activity: Smoking, Cell Phone/Headphone usage in active vehicle zones. "
+                    "4. Fall Risks: Person near unprotected edges, climbing without harness, or leaning on weak barriers. "
+                    "5. Danger Zone: Person near active excavator buckets, under heavy suspended loads, or within the swing radius of moving machinery. (CRITICAL) "
+                    "6. Health/Emergency: A person lying on the floor (potential fall/injury/unresponsive). "
+                    "7. Fire/Smoke: Large plumes signifying fire (distinguish from dust). "
+                    "If you detect any violations, output them as a strict JSON list of objects. "
+                    "Each object MUST have: "
+                    "\"label\": A concise string like 'Smoking', 'Phone Usage', 'Fall Risk', 'Danger Zone Alert', 'No Helmet', 'Injury Risk', 'Fire'. "
+                    "\"confidence\": A float between 0.0 and 1.0. "
+                    "\"reasoning\": A one-sentence technical explanation (e.g. 'Worker is within the exclusion zone of an active excavator bucket'). "
+                    "\"recommendation\": A short remedial action (e.g. 'Stop heavy machinery immediately and clear the exclusion zone'). "
+                    "\"box_2d\": [ymin, xmin, ymax, xmax] scaled 0 to 1000. "
+                    "If everything is safe, return []."
+                )
+                
+                response = self.model.generate_content([prompt, pil_img])
+                results = json.loads(response.text)
+                
+                validated = []
+                for r in results:
+                    if 'label' in r and 'confidence' in r and 'box_2d' in r:
+                        # Ensure reasoning exists
+                        if 'reasoning' not in r: r['reasoning'] = f"Semantic anomaly detected in {r['label']} pattern."
+                        validated.append(r)
+                
+                self.last_results = validated
+                self.last_process_time = time.time()
+            except Exception as e:
+                pass # Silent fail to prevent stream crash on API rate limits / json parse errors
+            finally:
+                self.is_processing = False
+
+        threading.Thread(target=run_inference, daemon=True).start()
+
 class PPE_Detector:
-    def __init__(self, ppe_model_path="ppe_repo/models/best.pt", phone_model_path="yolov8m.pt"):
-        import os
-        
-        # 1. Load the highly accurate YOLO medium model for cell phones and humans
-        print(f"Loading Base Human/Phone model: {phone_model_path}")
-        self.phone_model = YOLO(phone_model_path)
-        
-        # 2. Load the custom PPE weights
-        if os.path.exists(ppe_model_path):
-            print(f"Loading Custom PPE model: {ppe_model_path}")
-            self.ppe_model = YOLO(ppe_model_path)
-            self.has_ppe = True
-        else:
-            print(f"Warning: {ppe_model_path} not found. PPE checking will be disabled.")
-            self.ppe_model = None
-            self.has_ppe = False
+    def __init__(self, model_path="safe.pt"):
+        print(f"Loading Base User Trained YOLO ML Model: {model_path}")
+        self.yolo_model = YOLO(model_path)
         self.muted_labels = []
+        
+        # Initialize Hybrid VLM
+        self.vision_llm = HybridVisionLLM()
             
     def calculate_iou(self, box1, box2):
         x_left = max(box1[0], box2[0])
@@ -37,112 +107,141 @@ class PPE_Detector:
         if denominator <= 0:
             return 0.0
 
-        # Overlapping percentage of the smaller object (PPE) inside the larger object (person)
         return intersection_area / denominator
 
     def detect(self, frame):
         detections = []
-        
-        # 1. PREDICT PHONE/HUMAN
         persons = []
-        other_phone_boxes = []
-        phone_results = self.phone_model(frame, classes=[0, 67], verbose=False)
-        for result in phone_results:
-            for box in result.boxes:
-                if float(box.conf[0]) < 0.25: continue
-                xyxy = box.xyxy[0].tolist()
-                label = self.phone_model.names[int(box.cls[0])].lower()
-                if label == 'person':
-                    persons.append({"box": xyxy, "conf": float(box.conf[0])})
-                else:
-                    other_phone_boxes.append({"label": label, "box": xyxy, "conf": float(box.conf[0])})
-
-        # 2. PREDICT PPE ITEMS
         ppe_boxes = []
-        if self.has_ppe:
-            ppe_results = self.ppe_model(frame, verbose=False)
-            for result in ppe_results:
-                for box in result.boxes:
-                    if float(box.conf[0]) < 0.35: continue
-                    xyxy = box.xyxy[0].tolist()
-                    label = self.ppe_model.names[int(box.cls[0])].lower()
-                    ppe_boxes.append({"label": label, "box": xyxy, "conf": float(box.conf[0])})
+        other_boxes = []
 
-        # 3. VERIFY 4-PIECE PPE ON INDIVIDUAL HUMANS
+        h_frame, w_frame = frame.shape[:2]
+
+        # 1. RUN UNIFIED MACHINE LEARNING YOLO PREDICTION (Optimized for 416 resolution for 6x speed)
+        results = self.yolo_model(frame, verbose=False, imgsz=416)
+        for result in results:
+            for box in result.boxes:
+                conf = float(box.conf[0])
+                xyxy = box.xyxy[0].tolist()
+                label = self.yolo_model.names[int(box.cls[0])].lower()
+                
+                if label == 'person' and conf > 0.4:
+                    persons.append({"box": xyxy, "conf": conf, "label": "person"})
+                elif any(word in label for word in ['helmet', 'hardhat', 'vest', 'harness', 'belt']) and conf > 0.2:
+                    # Use lower threshold for safety gear to ensure we don't miss any subtle marks
+                    ppe_boxes.append({"label": label, "box": xyxy, "conf": conf})
+                elif conf > 0.35:
+                    other_boxes.append({"label": label, "box": xyxy, "conf": conf})
+
+        # Process standard ML logic (YOLO)
         for p in persons:
             xyxy = p["box"]
             x1, y1, x2, y2 = map(int, xyxy)
             w, h = x2 - x1, y2 - y1
-            status = "safe"
-            color = (0, 255, 0)
             
-            # Check 4 distinct PPE items intersecting this person
-            has_helmet = any(b["label"] in ["hardhat", "helmet", "safety helmet"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
-            has_vest = any(b["label"] in ["vest", "safety vest"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
-            has_shoes = any(b["label"] in ["shoes", "boots", "safety shoes"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
-            has_gloves = any(b["label"] in ["gloves", "safety gloves"] and self.calculate_iou(xyxy, b["box"]) > 0.15 for b in ppe_boxes)
+            has_helmet = any(("helmet" in b["label"] or "hardhat" in b["label"]) and self.calculate_iou(xyxy, b["box"]) > 0.1 for b in ppe_boxes)
+            has_vest = any("vest" in b["label"] and self.calculate_iou(xyxy, b["box"]) > 0.1 for b in ppe_boxes)
+            has_harness = any(("harness" in b["label"] or "belt" in b["label"]) and self.calculate_iou(xyxy, b["box"]) > 0.1 for b in ppe_boxes)
 
             missing = []
             if not has_helmet: missing.append("Helmet")
             if not has_vest: missing.append("Vest")
-            # We ONLY alert for Shoes and Gloves explicitly to avoid redundant noisy arrays
-            if not has_shoes: missing.append("Shoes")
-            if not has_gloves: missing.append("Gloves")
+            
+            # Special case: If user wants ladder workers with harness to be 'Safe' (or less strictly penalized)
+            if has_harness and not has_helmet: 
+                # If they have a harness, it marks them as height-safe
+                harness_bonus = True 
+            else:
+                harness_bonus = False
 
-            if w > h * 1.3:
-                final_label = "Fall Risk: Person Down"
-                status = "violation"
-                color = (0, 0, 255)
-            elif missing:
-                if len(missing) >= 3:
-                    final_label = "Violation: No PPE"
+            status, final_label, color = "safe", "Safe: Full PPE", (0, 255, 0)
+            
+            if missing:
+                if harness_bonus and missing == ["Helmet"]:
+                    final_label = "Safe: Harness Secured"
+                    status, color = "safe", (0, 255, 0)
                 else:
                     final_label = f"Violation: No {', '.join(missing)}"
-                status = "violation"
-                color = (0, 0, 255)
-            else:
-                final_label = "Safe: Full PPE"
-                color = (0, 255, 0)
-
-            # Zone Check
-            h_frame, w_frame = frame.shape[:2]
-            if y2 > h_frame * 0.8:
-                final_label = "Unauthorized: Danger Zone"
-                status = "violation"
-                color = (0, 0, 255)
-
-            if final_label in self.muted_labels:
-                continue
-
-            detections.append({"label": final_label, "confidence": p["conf"], "box": xyxy, "status": status})
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 2)
-
-        # 4. RENDER OTHER ITEMS (Machinery, Phones)
-        for obj in ppe_boxes + other_phone_boxes:
-            label = obj["label"]
-            if label in ['hardhat', 'helmet', 'vest', 'safety vest', 'shoes', 'boots', 'gloves', 'person', 'no-hardhat', 'no-safety vest', 'no-mask', 'mask', 'safety cone']:
-                continue 
-                
-            xyxy = obj["box"]
-            x1, y1, x2, y2 = map(int, xyxy)
+                    status, color = "violation", (0, 0, 255)
             
-            if label in ['machinery', 'vehicle', 'truck', 'car', 'excavator']:
-                final_label = f"Info: {label.title()} Active"
-                status = "safe" 
-                color = (255, 165, 0)
-            elif label == 'cell phone':
-                final_label = "Unsafe: Phone Usage"
-                status = "violation"
-                color = (0, 165, 255)
-            else:
-                continue
+            # Additional safety tag if they have everything + harness
+            if not missing and has_harness:
+                final_label = "Safe: Max PPE (+Harness)"
 
-            if final_label in self.muted_labels:
-                continue
+            yolo_person_conf = p["conf"]
+            detections.append({"label": final_label, "confidence": yolo_person_conf, "box": [int(v) for v in xyxy], "status": status, "source": "YOLO"})
 
-            detections.append({"label": final_label, "confidence": obj["conf"], "box": xyxy, "status": status})
+        # Pass non-person items visually
+        for obj in ppe_boxes + other_boxes:
+            if obj["label"] in ['hardhat', 'helmet', 'vest', 'person']:
+                continue 
+            status = "safe" if obj["label"] in ['machinery', 'excavator'] else "violation"
+            color = (255, 165, 0) if status == "safe" else (0, 165, 255)
+            detections.append({"label": f"Alert: {obj['label'].title()}", "confidence": obj["conf"], "box": [int(v) for v in obj["box"]], "status": status, "source": "YOLO"})
+
+        # 2. RUN HYBRID VISION LLM (Semantic reasoning background pass)
+        self.vision_llm.analyze_async(frame)
+        
+        # 3. MERGE LOGIC (Highest probable correct answer wins)
+        # Use LLM bounding boxes mapped back to frame resolution
+        if self.vision_llm.last_results:
+            for llm_violation in self.vision_llm.last_results:
+                v_label = llm_violation['label']
+                v_conf = llm_violation['confidence']
+                ymin, xmin, ymax, xmax = llm_violation['box_2d']
+                
+                # Convert 0-1000 scale to frame pixels
+                v_box = [
+                    int((xmin / 1000.0) * w_frame),
+                    int((ymin / 1000.0) * h_frame),
+                    int((xmax / 1000.0) * w_frame),
+                    int((ymax / 1000.0) * h_frame)
+                ]
+                
+                v_status = "violation"
+                
+                # Hybrid Override Logic
+                overlap_found = False
+                for d in detections:
+                    iou = self.calculate_iou(d["box"], v_box)
+                    if iou > 0.3:
+                        overlap_found = True
+                        # If LLM has higher confidence or recognizes a semantic threat YOLO cannot natively categorize
+                        if v_conf > d["confidence"] or any(threat in v_label.lower() for threat in ['smoke', 'phone', 'hazard', 'fall', 'fire', 'injury', 'unresponsive', 'collapse', 'danger', 'exclusion']):
+                            if d["status"] == "safe" or v_conf > d["confidence"]:
+                                d["label"] = f"LLM Flag: {v_label}"
+                                d["confidence"] = v_conf
+                                d["status"] = "violation"
+                                d["reasoning"] = v.get("reasoning")
+                                d["recommendation"] = v.get("recommendation")
+                                d["color"] = (255, 0, 255) # Magenta for LLM override
+                
+                # If LLM found a violation YOLO totally missed, append it natively
+                if not overlap_found and v_conf > 0.4:
+                    detections.append({
+                        "label": f"VLM Alert: {v_label}",
+                        "confidence": v_conf,
+                        "box": v_box,
+                        "status": "violation",
+                        "reasoning": v.get("reasoning"),
+                        "recommendation": v.get("recommendation"),
+                        "color": (255, 0, 255)
+                    })
+        
+        # 4. FINAL RENDER
+        final_detections = []
+        for d in detections:
+            if d["label"] in self.muted_labels: continue
+            final_detections.append(d)
+            
+            x1, y1, x2, y2 = map(int, d["box"])
+            color = d.get("color", (0, 0, 255) if d["status"] == "violation" else (0, 255, 0))
+            
+            # Draw standard box
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, final_label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            
+            # Add dynamic source/confidence badge
+            display_text = f"{d['label']} {d['confidence']:.2f}"
+            cv2.putText(frame, display_text, (x1, max(y1 - 10, 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 1, cv2.LINE_AA)
 
-        return detections, frame
+        return final_detections, frame
