@@ -6,76 +6,106 @@ import threading
 from ultralytics import YOLO
 
 class HybridVisionLLM:
-    """Asynchronous background processor to evaluate complex semantic scenes via Vision LLM"""
+    """Asynchronous background processor to evaluate complex semantic scenes via Grok Vision LLM (xAI)"""
     def __init__(self):
         self.enabled = False
         self.last_results = []
         self.last_process_time = 0
         self.is_processing = False
-        self.api_key = os.getenv("GEMINI_API_KEY", "")
-        
+        self.api_key = os.getenv("GROK_API_KEY", "")
+        self.client = None
+
         if self.api_key:
             try:
-                import google.generativeai as genai
-                genai.configure(api_key=self.api_key)
-                # Using Gemini 1.5 Flash as it is extremely fast and natively understands bounding box coordinates
-                self.model = genai.GenerativeModel("gemini-1.5-flash", generation_config={"response_mime_type": "application/json"})
+                from openai import OpenAI
+                self.client = OpenAI(
+                    api_key=self.api_key,
+                    base_url="https://api.x.ai/v1",
+                )
+                self.model_name = "grok-2-vision-latest"
                 self.enabled = True
-                print("Vision LLM Hybrid Mode Enabled (Gemini).")
+                print("Vision LLM Hybrid Mode Enabled (Grok-2 Vision via xAI).")
             except Exception as e:
-                print(f"Failed to initialize Vision LLM: {e}")
+                print(f"Failed to initialize Grok Vision LLM: {e}")
 
     def analyze_async(self, frame_bgr):
-        # Throttle Vision LLM API to max 1 request every 1.0 seconds for higher semantic density
-        if not self.enabled or self.is_processing or (time.time() - self.last_process_time < 1.0):
+        # Throttle Vision LLM API to max 1 request every 1.5 seconds
+        if not self.enabled or self.is_processing or (time.time() - self.last_process_time < 1.5):
             return
 
         self.is_processing = True
-        
+
         # Copy to avoid thread race conditions
         frame_copy = frame_bgr.copy()
-        
+
         def run_inference():
             try:
-                from PIL import Image
-                img_rgb = cv2.cvtColor(frame_copy, cv2.COLOR_BGR2RGB)
-                pil_img = Image.fromarray(img_rgb)
-                
-                # Instruction tailored to return bounding boxes in [ymin, xmin, ymax, xmax] format (0-1000 scale)
+                import base64
+                # Encode frame as JPEG base64 for the API
+                _, buffer = cv2.imencode('.jpg', frame_copy, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                img_b64 = base64.b64encode(buffer).decode('utf-8')
+
                 prompt = (
                     "You are a strict industrial safety AI monitoring a live CCTV feed. "
                     "Analyze the scene carefully for the following critical violations: "
                     "1. Missing PPE (Helmet, Vest, Harness). "
-                    "2. Unauthorized Zone: Person within restricted red-taped areas, technical rooms, or fenced construction zones without authorization. "
+                    "2. Unauthorized Zone: Person within restricted red-taped areas or fenced construction zones. "
                     "3. Unsafe activity: Smoking, Cell Phone/Headphone usage in active vehicle zones. "
-                    "4. Fall Risks: Person near unprotected edges, climbing without harness, or leaning on weak barriers. "
-                    "5. Danger Zone: Person near active excavator buckets, under heavy suspended loads, or within the swing radius of moving machinery. (CRITICAL) "
+                    "4. Fall Risks: Person near unprotected edges, climbing without harness. "
+                    "5. Danger Zone: Person near active excavator buckets, under heavy suspended loads, or within swing radius of moving machinery. (CRITICAL) "
                     "6. Health/Emergency: A person lying on the floor (potential fall/injury/unresponsive). "
                     "7. Fire/Smoke: Large plumes signifying fire (distinguish from dust). "
-                    "If you detect any violations, output them as a strict JSON list of objects. "
-                    "Each object MUST have: "
-                    "\"label\": A concise string like 'Smoking', 'Phone Usage', 'Fall Risk', 'Danger Zone Alert', 'No Helmet', 'Injury Risk', 'Fire'. "
-                    "\"confidence\": A float between 0.0 and 1.0. "
-                    "\"reasoning\": A one-sentence technical explanation (e.g. 'Worker is within the exclusion zone of an active excavator bucket'). "
-                    "\"recommendation\": A short remedial action (e.g. 'Stop heavy machinery immediately and clear the exclusion zone'). "
+                    "Respond ONLY with a valid JSON array of violation objects. Each object MUST have: "
+                    "\"label\": concise string e.g. 'Smoking', 'Phone Usage', 'Fall Risk', 'Danger Zone Alert', 'No Helmet', 'Injury Risk', 'Fire'. "
+                    "\"confidence\": float 0.0-1.0. "
+                    "\"reasoning\": one-sentence technical explanation. "
+                    "\"recommendation\": short remedial action. "
                     "\"box_2d\": [ymin, xmin, ymax, xmax] scaled 0 to 1000. "
-                    "If everything is safe, return []."
+                    "If scene is safe, respond with exactly: []"
                 )
-                
-                response = self.model.generate_content([prompt, pil_img])
-                results = json.loads(response.text)
-                
+
+                response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{img_b64}",
+                                        "detail": "high"
+                                    }
+                                },
+                                {"type": "text", "text": prompt}
+                            ]
+                        }
+                    ],
+                    temperature=0.1,
+                    max_tokens=1024,
+                )
+
+                raw = response.choices[0].message.content.strip()
+                # Strip markdown code fences if present
+                if raw.startswith("```"):
+                    raw = raw.split("```")[1]
+                    if raw.startswith("json"):
+                        raw = raw[4:]
+                results = json.loads(raw)
+
                 validated = []
                 for r in results:
                     if 'label' in r and 'confidence' in r and 'box_2d' in r:
-                        # Ensure reasoning exists
-                        if 'reasoning' not in r: r['reasoning'] = f"Semantic anomaly detected in {r['label']} pattern."
+                        if 'reasoning' not in r:
+                            r['reasoning'] = f"Semantic anomaly detected: {r['label']}."
                         validated.append(r)
-                
+
                 self.last_results = validated
                 self.last_process_time = time.time()
+                if validated:
+                    print(f"[Grok Vision] Detected {len(validated)} semantic violation(s): {[v['label'] for v in validated]}")
             except Exception as e:
-                pass # Silent fail to prevent stream crash on API rate limits / json parse errors
+                print(f"[Grok Vision] Inference error: {e}")
             finally:
                 self.is_processing = False
 
@@ -209,22 +239,24 @@ class PPE_Detector:
                         # If LLM has higher confidence or recognizes a semantic threat YOLO cannot natively categorize
                         if v_conf > d["confidence"] or any(threat in v_label.lower() for threat in ['smoke', 'phone', 'hazard', 'fall', 'fire', 'injury', 'unresponsive', 'collapse', 'danger', 'exclusion']):
                             if d["status"] == "safe" or v_conf > d["confidence"]:
-                                d["label"] = f"LLM Flag: {v_label}"
+                                d["label"] = f"Grok Flag: {v_label}"
                                 d["confidence"] = v_conf
                                 d["status"] = "violation"
-                                d["reasoning"] = v.get("reasoning")
-                                d["recommendation"] = v.get("recommendation")
+                                d["source"] = "LLM"
+                                d["reasoning"] = llm_violation.get("reasoning")
+                                d["recommendation"] = llm_violation.get("recommendation")
                                 d["color"] = (255, 0, 255) # Magenta for LLM override
-                
+
                 # If LLM found a violation YOLO totally missed, append it natively
                 if not overlap_found and v_conf > 0.4:
                     detections.append({
-                        "label": f"VLM Alert: {v_label}",
+                        "label": f"Grok Alert: {v_label}",
                         "confidence": v_conf,
                         "box": v_box,
                         "status": "violation",
-                        "reasoning": v.get("reasoning"),
-                        "recommendation": v.get("recommendation"),
+                        "source": "LLM",
+                        "reasoning": llm_violation.get("reasoning"),
+                        "recommendation": llm_violation.get("recommendation"),
                         "color": (255, 0, 255)
                     })
         

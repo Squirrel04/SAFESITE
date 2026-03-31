@@ -18,7 +18,7 @@ class ConnectionManager:
                 await self.camera_connections[camera_id].close()
             except Exception:
                 pass
-        
+
         await websocket.accept()
         self.camera_connections[camera_id] = websocket
         if camera_id not in self.client_connections:
@@ -39,16 +39,27 @@ class ConnectionManager:
 
     def disconnect_client(self, websocket: WebSocket, camera_id: str):
         if camera_id in self.client_connections:
-            self.client_connections[camera_id].remove(websocket)
+            try:
+                self.client_connections[camera_id].remove(websocket)
+            except ValueError:
+                pass
             print(f"Client disconnected from camera {camera_id}.")
 
     async def broadcast(self, message: bytes, camera_id: str):
-        if camera_id in self.client_connections:
-            for connection in self.client_connections[camera_id]:
-                try:
-                    await connection.send_bytes(message)
-                except Exception as e:
-                    print(f"Error broadcasting to client: {e}")
+        if camera_id not in self.client_connections:
+            return
+        dead = []
+        for connection in self.client_connections[camera_id]:
+            try:
+                await connection.send_bytes(message)
+            except Exception:
+                dead.append(connection)
+        # Clean up dead connections
+        for conn in dead:
+            try:
+                self.client_connections[camera_id].remove(conn)
+            except ValueError:
+                pass
 
     async def connect_notification(self, websocket: WebSocket):
         await websocket.accept()
@@ -56,18 +67,26 @@ class ConnectionManager:
         print("Notification client connected.")
 
     def disconnect_notification(self, websocket: WebSocket):
-        if websocket in self.notification_sockets:
+        try:
             self.notification_sockets.remove(websocket)
             print("Notification client disconnected.")
+        except ValueError:
+            pass
 
     async def broadcast_notification(self, data: dict):
         import json
         message = json.dumps(data, default=str)
-        for connection in self.notification_sockets:
+        dead = []
+        for connection in list(self.notification_sockets):
             try:
                 await connection.send_text(message)
-            except Exception as e:
-                print(f"Error broadcasting notification: {e}")
-                # We could remove the stale connection here
+            except Exception:
+                dead.append(connection)
+        # Clean up stale notification sockets immediately
+        for conn in dead:
+            try:
+                self.notification_sockets.remove(conn)
+            except ValueError:
+                pass
 
 manager = ConnectionManager()

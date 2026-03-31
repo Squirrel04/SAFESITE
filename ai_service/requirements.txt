@@ -6,3 +6,4 @@ python-dotenv
 labelImg
 websockets
 aiohttp
+openai
