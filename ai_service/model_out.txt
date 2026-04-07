@@ -1,0 +1,9 @@
+Testing models...
+grok-3: FAIL ({'code': 'The caller does not have permission to execute the specified operation', 'error': "Your newly created team doesn't have any credits or licenses yet. You can purchase those on https://console.x.ai/team/bbbc515a-4fb3-416e-a9b7-3a928a7fa64d."})
+grok-3-mini: FAIL ({'code': 'The caller does not have permission to execute the specified operation', 'error': "Your newly created team doesn't have any credits or licenses yet. You can purchase those on https://console.x.ai/team/bbbc515a-4fb3-416e-a9b7-3a928a7fa64d."})
+grok-3-vision: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-3-vision'})
+grok-3-pro: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-3-pro'})
+grok-2-vision: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-2-vision'})
+grok-2: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-2'})
+grok-1.5-vision: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-1.5-vision'})
+grok-beta: FAIL ({'code': 'Client specified an invalid argument', 'error': 'Model not found: grok-beta'})
