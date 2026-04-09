@@ -154,9 +154,7 @@ async def stream_frames():
                         await asyncio.sleep(0.5)
                         continue
 
-                    # 6x Speed Simulation: Skip 5 frames between each processed frame
-                    for _ in range(5):
-                        cap.grab()
+                    # Real-time processing: process every frame for smooth video and realistic evidence
                     
                     ret, frame = cap.read()
                     if not ret:

@@ -141,7 +141,7 @@ class PPE_Detector:
         for result in results:
             for box in result.boxes:
                 conf = float(box.conf[0])
-                xyxy = box.xyxy[0].tolist()
+                xyxy = box.xyxy[0].tolist() 
                 label = self.yolo_model.names[int(box.cls[0])].lower()
                 
                 if label == 'person' and conf > 0.4:
@@ -194,9 +194,18 @@ class PPE_Detector:
         for obj in ppe_boxes + other_boxes:
             if obj["label"] in ['hardhat', 'helmet', 'vest', 'person']:
                 continue 
-            status = "safe" if obj["label"] in ['machinery', 'excavator'] else "violation"
-            color = (255, 165, 0) if status == "safe" else (0, 165, 255)
-            detections.append({"label": f"Alert: {obj['label'].title()}", "confidence": obj["conf"], "box": [int(v) for v in obj["box"]], "status": status, "source": "YOLO"})
+            
+            is_zone = obj["label"] in ['machinery', 'excavator']
+            has_person = any(self.calculate_iou(p["box"], obj["box"]) > 0.05 for p in persons)
+            
+            if is_zone:
+                status = "violation" if has_person else "warning"
+                color = (255, 165, 0)
+            else:
+                status = "violation"
+                color = (0, 165, 255)
+                
+            detections.append({"label": f"Alert: {obj['label'].title()}", "confidence": obj["conf"], "box": [int(v) for v in obj["box"]], "status": status, "source": "YOLO", "color": color})
 
         # 2. RUN HYBRID VISION LLM (Semantic reasoning background pass)
         self.vision_llm.analyze_async(frame)
@@ -217,7 +226,9 @@ class PPE_Detector:
                     int((ymax / 1000.0) * h_frame)
                 ]
                 
-                v_status = "violation"
+                is_zone = any(z in v_label.lower() for z in ['zone', 'risk', 'danger', 'hazard', 'machinery', 'excavator'])
+                has_person = any(self.calculate_iou(p["box"], v_box) > 0.05 for p in persons)
+                v_status = "violation" if (has_person or not is_zone) else "warning"
                 
                 # Hybrid Override Logic
                 overlap_found = False
@@ -228,21 +239,20 @@ class PPE_Detector:
                         # If LLM has higher confidence or recognizes a semantic threat YOLO cannot natively categorize
                         if v_conf > d["confidence"] or any(threat in v_label.lower() for threat in ['smoke', 'phone', 'hazard', 'fall', 'fire', 'injury', 'unresponsive', 'collapse', 'danger', 'exclusion', 'unauthorized', 'zone', 'risk']):
                             if d["status"] == "safe" or v_conf > d["confidence"]:
-                                d["label"] = f"Grok Flag: {v_label}"
+                                d["label"] = f"Alert: {v_label}"
                                 d["confidence"] = v_conf
-                                d["status"] = "violation"
+                                d["status"] = v_status
                                 d["source"] = "LLM"
                                 d["reasoning"] = llm_violation.get("reasoning")
                                 d["recommendation"] = llm_violation.get("recommendation")
                                 d["color"] = (255, 0, 255) # Magenta for LLM override
 
-                # If LLM found a violation YOLO totally missed, append it natively
                 if not overlap_found and v_conf > 0.4:
                     detections.append({
-                        "label": f"Grok Alert: {v_label}",
+                        "label": f"Alert: {v_label}",
                         "confidence": v_conf,
                         "box": v_box,
-                        "status": "violation",
+                        "status": v_status,
                         "source": "LLM",
                         "reasoning": llm_violation.get("reasoning"),
                         "recommendation": llm_violation.get("recommendation"),

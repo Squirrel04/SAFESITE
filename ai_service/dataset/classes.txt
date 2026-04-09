@@ -1,3 +1,0 @@
-Helmet
-Vest
-Person
