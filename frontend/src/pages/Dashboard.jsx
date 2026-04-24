@@ -46,7 +46,7 @@ const Dashboard = () => {
             title: 'Total Alerts', 
             value: alerts.length, 
             icon: AlertTriangle, 
-            color: 'indigo', 
+            color: 'amber', 
             trend: 15,
             onClick: () => navigate('/alerts')
         },
@@ -54,7 +54,7 @@ const Dashboard = () => {
             title: 'Active Cameras', 
             value: `${statsData.active_cameras || 0}/${statsData.total_cameras || 2}`, 
             icon: Camera, 
-            color: 'blue', 
+            color: 'yellow', 
             trend: 0,
             onClick: () => navigate('/cameras')
         },
@@ -74,7 +74,7 @@ const Dashboard = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-gradient-to-tr from-indigo-500 to-blue-600 rounded-2xl shadow-xl relative group">
+                    <div className="p-3 bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl shadow-xl relative group">
                         <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
                         <Shield className="w-8 h-8 text-white relative z-10" />
                     </div>
@@ -112,10 +112,10 @@ const Dashboard = () => {
                 >
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
-                            <Camera className="w-5 h-5 mr-3 text-indigo-400" />
+                            <Camera className="w-5 h-5 mr-3 text-amber-400" />
                             Live Feeds
                         </h2>
-                        <button className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors font-semibold tracking-wide uppercase">View All</button>
+                        <button className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors font-semibold tracking-wide uppercase">View All</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {cameras.map((cam) => (
@@ -134,7 +134,7 @@ const Dashboard = () => {
                     transition={{ duration: 0.5, delay: 0.4 }}
                 >
                     <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
-                        <Activity className="w-5 h-5 mr-3 text-violet-400" />
+                        <Activity className="w-5 h-5 mr-3 text-amber-400" />
                         Activity Trends
                     </h2>
                     <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 h-[400px] shadow-xl relative overflow-hidden group">
@@ -145,12 +145,12 @@ const Dashboard = () => {
                             <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="colorDetections" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#fbbf24" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="colorViolations" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#facc15" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#facc15" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
@@ -167,8 +167,8 @@ const Dashboard = () => {
                                     }}
                                     itemStyle={{ color: '#e2e8f0', fontWeight: '500' }}
                                 />
-                                <Area type="monotone" dataKey="detections" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorDetections)" />
-                                <Area type="monotone" dataKey="violations" stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#colorViolations)" />
+                                <Area type="monotone" dataKey="detections" stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorDetections)" />
+                                <Area type="monotone" dataKey="violations" stroke="#facc15" strokeWidth={3} fillOpacity={1} fill="url(#colorViolations)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

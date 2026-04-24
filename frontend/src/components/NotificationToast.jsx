@@ -9,7 +9,7 @@ const NotificationToast = ({ notification, onDismiss }) => {
     switch (severity.toLowerCase()) {
       case 'high': return <AlertCircle className="w-6 h-6 text-red-500" />;
       case 'medium': return <Info className="w-6 h-6 text-orange-500" />;
-      default: return <CheckCircle className="w-6 h-6 text-blue-500" />;
+      default: return <CheckCircle className="w-6 h-6 text-yellow-500" />;
     }
   };
 
@@ -17,7 +17,7 @@ const NotificationToast = ({ notification, onDismiss }) => {
     switch (severity.toLowerCase()) {
       case 'high': return 'bg-red-950/40 border-red-900/50';
       case 'medium': return 'bg-orange-950/40 border-orange-900/50';
-      default: return 'bg-blue-950/40 border-blue-900/50';
+      default: return 'bg-yellow-950/40 border-yellow-900/50';
     }
   };
 

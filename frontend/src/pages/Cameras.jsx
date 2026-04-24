@@ -16,7 +16,7 @@ const Cameras = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center space-x-4"
             >
-                <div className="p-3 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative group w-14 h-14 flex items-center justify-center">
+                <div className="p-3 bg-gradient-to-tr from-yellow-500 to-yellow-600 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] relative group w-14 h-14 flex items-center justify-center">
                     <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
                     <Camera className="w-8 h-8 text-white relative z-10" />
                 </div>

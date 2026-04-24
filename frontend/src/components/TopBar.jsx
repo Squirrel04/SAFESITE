@@ -35,18 +35,18 @@ const TopBar = () => {
             {/* Search / Breadcrumb Placeholder */}
             <div className="flex items-center">
                 <div className="relative group">
-                    <Search className="w-4 h-4 text-slate-500 absolute left-4 top-1/2 transform -translate-y-1/2 group-focus-within:text-cyan-400 transition-colors" />
+                    <Search className="w-4 h-4 text-slate-500 absolute left-4 top-1/2 transform -translate-y-1/2 group-focus-within:text-yellow-400 transition-colors" />
                     <input
                         type="text"
                         placeholder="Search monitoring..."
-                        className="bg-slate-950/50 border border-slate-800 rounded-2xl py-2.5 pl-11 pr-4 text-sm text-slate-200 focus:ring-1 focus:ring-cyan-500 outline-none w-80 transition-all font-medium placeholder-slate-600 focus:border-cyan-500/50 shadow-inner"
+                        className="bg-slate-950/50 border border-slate-800 rounded-2xl py-2.5 pl-11 pr-4 text-sm text-slate-200 focus:ring-1 focus:ring-yellow-500 outline-none w-80 transition-all font-medium placeholder-slate-600 focus:border-yellow-500/50 shadow-inner"
                     />
                 </div>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center space-x-5">
-                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
                     <ShieldCheck className="w-4 h-4" />
                     <span className="text-xs font-semibold tracking-wide uppercase">System Secure</span>
                 </div>
@@ -58,8 +58,8 @@ const TopBar = () => {
                         className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50 transition-all group"
                         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                     >
-                        <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center border border-slate-600 shadow-inner group-hover:border-cyan-500/50 transition-colors">
-                            <User className="w-4 h-4 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+                        <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center border border-slate-600 shadow-inner group-hover:border-yellow-500/50 transition-colors">
+                            <User className="w-4 h-4 text-slate-300 group-hover:text-yellow-400 transition-colors" />
                         </div>
                         <div className="flex items-center">
                             <div>
@@ -80,7 +80,7 @@ const TopBar = () => {
                             >
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center px-4 py-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors font-medium text-sm group"
+                                    className="w-full flex items-center px-4 py-3 text-amber-400 hover:bg-amber-500/10 rounded-xl transition-colors font-medium text-sm group"
                                 >
                                     <LogOut className="w-4 h-4 mr-3 group-hover:-translate-x-1 transition-transform" />
                                     Log Out

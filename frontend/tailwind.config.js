@@ -13,12 +13,12 @@ export default {
                     950: '#020617',
                 },
                 primary: {
-                    DEFAULT: '#06b6d4', // Cyan 500
-                    glow: '#06b6d480',
+                    DEFAULT: '#fbbf24', // Amber 400
+                    glow: '#fbbf2480',
                 },
                 accent: {
-                    DEFAULT: '#f43f5e', // Rose 500
-                    glow: '#f43f5e80',
+                    DEFAULT: '#facc15', // Yellow 400
+                    glow: '#facc1580',
                 }
             },
             fontFamily: {

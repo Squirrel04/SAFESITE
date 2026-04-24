@@ -196,16 +196,39 @@ class PPE_Detector:
                 continue 
             
             is_zone = obj["label"] in ['machinery', 'excavator']
-            has_person = any(self.calculate_iou(p["box"], obj["box"]) > 0.05 for p in persons)
+            
+            has_person = False
+            margin_box = obj["box"]
+            if is_zone:
+                # Spatial coordinate margin technique: expand danger zone by 25% for safety proximity
+                bx1, by1, bx2, by2 = obj["box"]
+                bw, bh = bx2 - bx1, by2 - by1
+                margin_perc_x = bw * 0.25
+                margin_perc_y = bh * 0.25
+                margin_box = [
+                    max(0, bx1 - margin_perc_x),
+                    max(0, by1 - margin_perc_y),
+                    min(w_frame, bx2 + margin_perc_x),
+                    min(h_frame, by2 + margin_perc_y)
+                ]
+                # Check intersection with the expanded safety margin
+                has_person = any(self.calculate_iou(p["box"], margin_box) > 0.01 for p in persons)
+                
+                # Optionally, we can draw the expanded danger margin as a dotted/faint line
+                # cv2.rectangle(frame, (int(margin_box[0]), int(margin_box[1])), (int(margin_box[2]), int(margin_box[3])), (0, 165, 255), 1)
+            else:
+                has_person = any(self.calculate_iou(p["box"], obj["box"]) > 0.05 for p in persons)
             
             if is_zone:
                 status = "violation" if has_person else "warning"
-                color = (255, 165, 0)
+                color = (0, 0, 255) if has_person else (255, 165, 0)
+                if has_person:
+                    obj["label"] = f"Danger Zone: {obj['label'].title()}"
             else:
                 status = "violation"
                 color = (0, 165, 255)
                 
-            detections.append({"label": f"Alert: {obj['label'].title()}", "confidence": obj["conf"], "box": [int(v) for v in obj["box"]], "status": status, "source": "YOLO", "color": color})
+            detections.append({"label": f"Alert: {obj['label'].title()}" if not is_zone or not has_person else obj["label"], "confidence": obj["conf"], "box": [int(v) for v in obj["box"]], "status": status, "source": "YOLO", "color": color})
 
         # 2. RUN HYBRID VISION LLM (Semantic reasoning background pass)
         self.vision_llm.analyze_async(frame)

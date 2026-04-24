@@ -22,7 +22,7 @@ const Sidebar = () => {
         <div className="h-screen w-64 bg-slate-900/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
             {/* Brand */}
             <div className="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/20">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl mr-3 shadow-lg flex items-center justify-center relative overflow-hidden">
+                <div className="w-10 h-10 bg-amber-600 rounded-xl mr-3 shadow-lg flex items-center justify-center relative overflow-hidden">
                     <Camera className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -39,7 +39,7 @@ const Sidebar = () => {
                         to={item.path}
                         className={({ isActive }) =>
                             `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative ${isActive
-                                ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/30'
+                                ? 'bg-amber-600/10 text-amber-400 border border-amber-500/30'
                                 : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
                             }`
                         }
@@ -47,9 +47,9 @@ const Sidebar = () => {
                         {({ isActive }) => (
                             <>
                                 {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-r-full" />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
                                 )}
-                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-indigo-400' : 'group-hover:text-slate-300'}`} />
+                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-amber-400' : 'group-hover:text-slate-300'}`} />
                                 <span className={`text-sm font-medium tracking-wide ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
                             </>
                         )}
@@ -61,7 +61,7 @@ const Sidebar = () => {
             <div className="flex-1 flex flex-col min-h-0 border-t border-slate-800/50">
                 <div className="px-6 py-4 flex items-center justify-between">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Recent Alerts</h2>
-                    <Bell className="w-3 h-3 text-indigo-500/50" />
+                    <Bell className="w-3 h-3 text-amber-500/50" />
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 space-y-2 pb-6 custom-scrollbar">
                     {alerts.length === 0 ? (
@@ -74,14 +74,14 @@ const Sidebar = () => {
                                 key={alert.id}
                                 className={`p-3 rounded-xl border transition-all duration-300 group ${
                                     alert.severity === 'high' 
-                                    ? 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/30' 
+                                    ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30' 
                                     : 'bg-orange-500/5 border-orange-500/10 hover:border-orange-500/30'
                                 }`}
                             >
                                 <div className="flex justify-between items-start gap-2">
                                     <div className="min-w-0">
                                         <p className={`text-[11px] font-bold truncate ${
-                                            alert.severity === 'high' ? 'text-rose-400' : 'text-orange-400'
+                                            alert.severity === 'high' ? 'text-amber-400' : 'text-orange-400'
                                         }`}>
                                             {alert.alert_type}
                                         </p>
@@ -91,7 +91,7 @@ const Sidebar = () => {
                                     </div>
                                     <button 
                                         onClick={() => dismissAlert(alert.id)}
-                                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-rose-400 transition-all"
+                                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-amber-400 transition-all"
                                         title="Ignore"
                                     >
                                         <XCircle className="w-3.5 h-3.5" />

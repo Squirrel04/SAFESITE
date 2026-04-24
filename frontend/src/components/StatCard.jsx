@@ -1,15 +1,17 @@
 import React from 'react';
 
-const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan', onClick }) => {
+const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }) => {
     const colorClasses = {
-        indigo: 'from-indigo-600 to-blue-600 text-indigo-400',
-        rose: 'from-rose-600 to-orange-600 text-rose-400',
+        indigo: 'from-amber-600 to-yellow-600 text-amber-400',
+        rose: 'from-amber-600 to-orange-600 text-amber-400',
         slate: 'from-slate-700 to-slate-800 text-slate-400',
-        emerald: 'from-emerald-600 to-teal-600 text-emerald-400',
-        blue: 'from-blue-600 to-indigo-600 text-blue-400',
+        emerald: 'from-yellow-600 to-teal-600 text-yellow-400',
+        blue: 'from-yellow-600 to-amber-600 text-yellow-400',
+        amber: 'from-amber-600 to-orange-600 text-amber-400',
+        yellow: 'from-yellow-600 to-amber-500 text-yellow-400',
     };
 
-    const gradientClass = colorClasses[color] || colorClasses['indigo'];
+    const gradientClass = colorClasses[color] || colorClasses['amber'];
     const textClass = gradientClass.split(' ').find(c => c.startsWith('text-'));
 
     return (
@@ -32,7 +34,7 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'cyan', onClick }) 
 
             {trend !== undefined && (
                 <div className="mt-6 flex items-center text-sm relative z-10">
-                    <span className={`font-semibold px-2 py-1 rounded-md bg-opacity-10 backdrop-blur-sm shadow-sm ${trend > 0 ? 'text-emerald-400 bg-emerald-500 border border-emerald-500/20' : 'text-rose-400 bg-rose-500 border border-rose-500/20'}`}>
+                    <span className={`font-semibold px-2 py-1 rounded-md bg-opacity-10 backdrop-blur-sm shadow-sm ${trend > 0 ? 'text-yellow-400 bg-yellow-500 border border-yellow-500/20' : 'text-amber-400 bg-amber-500 border border-amber-500/20'}`}>
                         {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
                     </span>
                     <span className="text-slate-500 ml-3 font-medium text-[13px] tracking-wide uppercase">from last hour</span>

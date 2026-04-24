@@ -62,8 +62,8 @@ const LiveCameraFeed = ({ id, location }) => {
             <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
                 <div className="flex items-center space-x-2">
                     <span className={`relative flex h-2.5 w-2.5`}>
-                        {status === 'online' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                        {status === 'online' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>}
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
                     </span>
                     <span className="text-xs font-medium text-white shadow-sm drop-shadow-md tracking-wide">{location}</span>
                 </div>
@@ -113,7 +113,7 @@ const LiveCameraFeed = ({ id, location }) => {
                 ) : (
                     <div className="flex flex-col items-center text-gray-600 justify-center h-full w-full bg-gray-900">
                         {status === 'connecting' ? (
-                            <RefreshCw className="w-10 h-10 mb-3 opacity-50 animate-spin text-cyan-500" />
+                            <RefreshCw className="w-10 h-10 mb-3 opacity-50 animate-spin text-yellow-500" />
                         ) : (
                             <div className="relative">
                                 <Camera className="w-12 h-12 mb-3 opacity-20 text-gray-400" />

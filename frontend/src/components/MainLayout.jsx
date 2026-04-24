@@ -5,7 +5,7 @@ import TopBar from './TopBar';
 
 const MainLayout = () => {
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30">
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-yellow-500/30">
             <Sidebar />
             <TopBar />
             <main className="ml-64 p-8 relative z-50">

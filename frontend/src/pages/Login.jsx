@@ -28,8 +28,8 @@ const Login = () => {
     return (
         <div className="min-h-screen bg-[#020617] flex items-center justify-center relative overflow-hidden font-sans">
             {/* Background glowing orbs */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-600/20 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-600/20 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-yellow-600/20 rounded-full blur-[120px]" />
 
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -44,7 +44,7 @@ const Login = () => {
                             initial={{ scale: 0.8, rotate: -10 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                            className="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30"
+                            className="w-16 h-16 bg-gradient-to-tr from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/30"
                         >
                             <Shield className="w-8 h-8 text-white" />
                         </motion.div>
@@ -66,11 +66,11 @@ const Login = () => {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <User className="h-5 w-5 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                                <User className="h-5 w-5 text-slate-500 group-focus-within:text-yellow-400 transition-colors" />
                             </div>
                             <input
                                 type="text"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -80,11 +80,11 @@ const Login = () => {
 
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                                <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-yellow-400 transition-colors" />
                             </div>
                             <input
                                 type="password"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -95,10 +95,10 @@ const Login = () => {
                         <button 
                             type="submit" 
                             disabled={isLoading}
-                            className="w-full relative group overflow-hidden bg-white text-slate-950 py-3.5 rounded-xl font-bold tracking-wide flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed hover:bg-cyan-50 transition-colors mt-8"
+                            className="w-full relative group overflow-hidden bg-white text-slate-950 py-3.5 rounded-xl font-bold tracking-wide flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed hover:bg-yellow-50 transition-colors mt-8"
                         >
                             {/* Hover effect gradient */}
-                            <div className="absolute inset-0 w-1/4 h-full bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent skew-x-[-20deg] group-hover:animate-shine" />
+                            <div className="absolute inset-0 w-1/4 h-full bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent skew-x-[-20deg] group-hover:animate-shine" />
                             
                             <span className="flex items-center">
                                 {isLoading ? 'Authenticating...' : 'Sign In'}

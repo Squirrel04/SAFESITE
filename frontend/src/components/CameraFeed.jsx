@@ -13,8 +13,8 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
             {/* Header / Status Overlay */}
             <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-start bg-gradient-to-b from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="flex items-center space-x-2">
-                    <span className={`flex h-2 w-2 rounded-full ${status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`}>
-                        <span className={`animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-75 ${status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                    <span className={`flex h-2 w-2 rounded-full ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}>
+                        <span className={`animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-75 ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
                     </span>
                     <span className="text-xs font-medium text-white shadow-sm">{location}</span>
                 </div>
@@ -28,7 +28,7 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
                 {status === 'online' ? (
                     // In a real app, this would be an <img src="stream_url" /> or <video>
                     <div className="w-full h-full relative">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-900/10 to-transparent"></div>
                         {/* Simulated content */}
                         <div className="absolute bottom-4 left-4">
                             <p className="text-xs text-slate-400 font-mono">CAM-{id} • 1080p • 30FPS</p>
