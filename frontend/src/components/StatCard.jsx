@@ -4,7 +4,7 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
     const colorClasses = {
         indigo: 'from-amber-600 to-yellow-600 text-amber-400',
         rose: 'from-amber-600 to-orange-600 text-amber-400',
-        slate: 'from-slate-700 to-slate-800 text-slate-400',
+        slate: 'from-slate-700 to-slate-800 text-slate-500',
         emerald: 'from-yellow-600 to-teal-600 text-yellow-400',
         blue: 'from-yellow-600 to-amber-600 text-yellow-400',
         amber: 'from-amber-600 to-orange-600 text-amber-400',
@@ -17,14 +17,14 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
     return (
         <div 
             onClick={onClick}
-            className="relative overflow-hidden rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-6 group hover:border-slate-700 hover:bg-slate-900/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1"
+            className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200 p-6 group hover:border-slate-300 hover:bg-white/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1"
         >
             <div className="flex items-center justify-between relative z-10">
                 <div>
-                    <p className="text-sm font-semibold text-slate-400 tracking-wide uppercase">{title}</p>
-                    <p className="text-4xl font-bold text-white mt-2 tracking-tight drop-shadow-sm">{value}</p>
+                    <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">{title}</p>
+                    <p className="text-4xl font-bold text-slate-900 mt-2 tracking-tight drop-shadow-sm">{value}</p>
                 </div>
-                <div className={`p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                <div className={`p-4 rounded-2xl bg-slate-50/50 border border-slate-300/50 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
                     <Icon className={`w-7 h-7 ${textClass}`} />
                 </div>
             </div>
@@ -51,3 +51,4 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
 };
 
 export default StatCard;
+

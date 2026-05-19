@@ -74,15 +74,15 @@ const TechnicalReview = () => {
                         </div>
                         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Neural Intelligence</span>
                     </div>
-                    <h1 className="text-4xl font-extrabold text-white tracking-tight">Technical Review</h1>
-                    <p className="text-slate-400 mt-2 font-medium text-sm tracking-wide max-w-xl">
+                    <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Technical Review</h1>
+                    <p className="text-slate-500 mt-2 font-medium text-sm tracking-wide max-w-xl">
                         Deep analysis of the Hybrid Vision Ensembling system. Reviewing semantic reasoning from Gemini 1.5 Flash vs spatial tracking from YOLO.
                     </p>
                 </div>
 
-                <div className="flex items-center space-x-2 bg-slate-800/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700/50 shadow-xl">
+                <div className="flex items-center space-x-2 bg-slate-50/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-300/50 shadow-xl">
                     <Activity className="w-4 h-4 text-yellow-400 animate-pulse" />
-                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">System Live: v2.4.0 (Hybrid Mode)</span>
+                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">System Live: v2.4.0 (Hybrid Mode)</span>
                 </div>
             </div>
 
@@ -99,21 +99,21 @@ const TechnicalReview = () => {
                             <Sparkles className="w-4 h-4" />
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono italic">Neural Safety Posture</span>
                         </div>
-                        <h2 className="text-3xl font-black text-white tracking-tight leading-tight">Site Security Intelligence Status</h2>
-                        <p className="text-slate-400 text-sm leading-relaxed max-w-2xl font-medium mt-4">
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">Site Security Intelligence Status</h2>
+                        <p className="text-slate-500 text-sm leading-relaxed max-w-2xl font-medium mt-4">
                             Based on the latest semantic reasoning from the **Gemini 1.5 Flash** hybrid pass: Site safety is currently <span className="text-amber-400 font-bold uppercase italic underline decoration-amber-500/40 underline-offset-4 tracking-tighter">Optimized</span> with high detection fidelity. System is actively enforcing **Unauthorized Zone** boundaries, **PPE Compliance** (Helmet/Vest/Harness), and **Heavy Machinery Exclusion Zones**.
                         </p>
                     </div>
                     <div className="flex gap-4">
-                        <div className="bg-slate-900/40 p-6 rounded-3xl border border-amber-500/10 backdrop-blur-md shadow-xl">
+                        <div className="bg-white/80 p-6 rounded-3xl border border-amber-500/10 backdrop-blur-md shadow-xl">
                             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Status</p>
                             <div className="flex items-center text-yellow-400 font-black text-xl italic uppercase tracking-tighter">
                                 <ShieldCheck className="w-5 h-5 mr-1" /> ACTIVE
                             </div>
                         </div>
-                        <div className="bg-slate-900/40 p-6 rounded-3xl border border-amber-500/10 backdrop-blur-md shadow-xl">
+                        <div className="bg-white/80 p-6 rounded-3xl border border-amber-500/10 backdrop-blur-md shadow-xl">
                             <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fidelity</p>
-                            <div className="flex items-center text-white font-black text-xl italic uppercase tracking-tighter">
+                            <div className="flex items-center text-slate-900 font-black text-xl italic uppercase tracking-tighter">
                                 <Activity className="w-5 h-5 mr-1 text-amber-400" /> HIGH
                             </div>
                         </div>
@@ -132,12 +132,12 @@ const TechnicalReview = () => {
                     { label: 'Hybrid Accuracy', value: `${stats.hybridConfidence}%`, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/10' },
                     { label: 'LLM Contribution', value: '35%', icon: Sparkles, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
                     { label: 'YOLO Reliability', value: '98.8%', icon: Binary, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-                    { label: 'Semantic Delta', value: `+${stats.accuracyGain}%`, icon: Microscope, color: 'text-slate-400', bg: 'bg-slate-500/10' }
+                    { label: 'Semantic Delta', value: `+${stats.accuracyGain}%`, icon: Microscope, color: 'text-slate-500', bg: 'bg-slate-500/10' }
                 ].map((stat, idx) => (
                     <motion.div 
                         key={idx}
                         variants={cardVariants}
-                        className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 p-6 rounded-3xl relative overflow-hidden group"
+                        className="bg-white/80 backdrop-blur-xl border border-slate-200/50 p-6 rounded-3xl relative overflow-hidden group"
                     >
                         <div className="hidden" />
                         <div className="relative z-10">
@@ -145,7 +145,7 @@ const TechnicalReview = () => {
                                 <stat.icon className="w-5 h-5" />
                             </div>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">{stat.label}</p>
-                            <h3 className="text-3xl font-black text-white mt-1 tracking-tight">{stat.value}</h3>
+                            <h3 className="text-3xl font-black text-slate-900 mt-1 tracking-tight">{stat.value}</h3>
                         </div>
                     </motion.div>
                 ))}
@@ -159,13 +159,13 @@ const TechnicalReview = () => {
                     transition={{ delay: 0.4 }}
                     className="lg:col-span-2 space-y-6"
                 >
-                    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] overflow-hidden shadow-2xl">
+                    <div className="bg-white/60 backdrop-blur-xl border border-slate-200/50 rounded-[2.5rem] overflow-hidden shadow-2xl">
                         <div className="p-8 border-b border-white/5 flex justify-between items-center">
                             <div className="flex items-center space-x-3">
-                                <Database className="w-5 h-5 text-slate-400" />
-                                <h2 className="text-xl font-bold text-white">Hybrid Incident Log</h2>
+                                <Database className="w-5 h-5 text-slate-500" />
+                                <h2 className="text-xl font-bold text-slate-900">Hybrid Incident Log</h2>
                             </div>
-                            <span className="text-[10px] bg-slate-800 text-slate-400 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Top Latency Analysis</span>
+                            <span className="text-[10px] bg-slate-50 text-slate-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Top Latency Analysis</span>
                         </div>
                         
                         <div className="divide-y divide-white/5">
@@ -186,12 +186,12 @@ const TechnicalReview = () => {
                                             </div>
                                             <div>
                                                 <div className="flex items-center space-x-3">
-                                                    <h3 className="text-lg font-bold text-slate-200">{incident.alert_type}</h3>
+                                                    <h3 className="text-lg font-bold text-slate-700">{incident.alert_type}</h3>
                                                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-tighter ${incident.severity === 'high' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
                                                         {incident.severity} Risk
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-slate-400 mt-1 max-w-lg line-clamp-1">{incident.message}</p>
+                                                <p className="text-sm text-slate-500 mt-1 max-w-lg line-clamp-1">{incident.message}</p>
                                                 <div className="mt-3 flex items-center space-x-4">
                                                     <span className="flex items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider">
                                                         <Activity className="w-3 h-3 mr-1.5 opacity-50" />
@@ -216,11 +216,11 @@ const TechnicalReview = () => {
                     transition={{ delay: 0.6 }}
                     className="space-y-6"
                 >
-                    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+                    <div className="bg-white/60 backdrop-blur-xl border border-slate-200/50 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-8">
                             <Brain className="w-12 h-12 text-yellow-500/10" />
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+                        <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
                             <Sparkles className="w-5 h-5 mr-3 text-yellow-400" />
                             LLM Semantic Reasoning
                         </h2>
@@ -236,21 +236,21 @@ const TechnicalReview = () => {
                                 >
                                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                                         <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Primary Intent</label>
-                                        <p className="text-sm text-slate-200 leading-relaxed italic">
+                                        <p className="text-sm text-slate-700 leading-relaxed italic">
                                             {selectedIncident.reasoning || `"The spatial alignment of the ${selectedIncident.alert_type.toLowerCase()} suggests a high-probability safety breach. Spatial reasoning is being refined for this instance."`}
                                         </p>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 bg-slate-800/50 rounded-2xl">
+                                        <div className="p-4 bg-slate-50/50 rounded-2xl">
                                             <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Ensemble Decision</h4>
                                             <p className={`text-xs font-bold ${selectedIncident.source === 'LLM' ? 'text-fuchsia-400' : 'text-yellow-400'}`}>
                                                 {selectedIncident.source === 'LLM' ? 'LLM Semantic Override' : 'YOLO Spatial Success'}
                                             </p>
                                         </div>
-                                        <div className="p-4 bg-slate-800/50 rounded-2xl">
+                                        <div className="p-4 bg-slate-50/50 rounded-2xl">
                                             <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Pixel Confidence</h4>
-                                            <p className="text-xs font-bold text-white">{(selectedIncident.confidence || 0.942).toFixed(4)}</p>
+                                            <p className="text-xs font-bold text-slate-900">{(selectedIncident.confidence || 0.942).toFixed(4)}</p>
                                         </div>
                                     </div>
 
@@ -262,7 +262,7 @@ const TechnicalReview = () => {
                                                 'Review 10s pre-roll DVR',
                                                 'Validate camera calibration'
                                             ].map((rec, i) => (
-                                                <li key={i} className="flex items-center text-xs text-slate-400">
+                                                <li key={i} className="flex items-center text-xs text-slate-500">
                                                     <ShieldCheck className="w-3.5 h-3.5 text-yellow-500/50 mr-2" />
                                                     {rec}
                                                 </li>
@@ -272,7 +272,7 @@ const TechnicalReview = () => {
                                 </motion.div>
                             ) : (
                                 <div className="py-20 text-center">
-                                    <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
+                                    <div className="w-16 h-16 bg-slate-50/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
                                         <AlertCircle className="w-6 h-6 text-slate-600" />
                                     </div>
                                     <p className="text-xs text-slate-500 font-medium px-8 leading-relaxed">
@@ -284,12 +284,12 @@ const TechnicalReview = () => {
                     </div>
 
                     {/* GPU/Resource Load (Decorative) */}
-                    <div className="bg-gradient-to-br from-amber-500/5 to-yellow-600/5 border border-slate-800/50 rounded-[2rem] p-6">
+                    <div className="bg-gradient-to-br from-amber-500/5 to-yellow-600/5 border border-slate-200/50 rounded-[2rem] p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Neural Compute Load</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Neural Compute Load</span>
                             <span className="text-[10px] text-amber-400 font-mono">42ms Latency</span>
                         </div>
-                        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden flex gap-0.5">
+                        <div className="h-1.5 bg-slate-50 rounded-full overflow-hidden flex gap-0.5">
                             <div className="h-full bg-amber-500 w-[60%]" />
                             <div className="h-full bg-yellow-500 w-[15%]" />
                             <div className="h-full bg-slate-700 w-[25%]" />
@@ -303,14 +303,14 @@ const TechnicalReview = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/50 rounded-[2.5rem] p-10 shadow-2xl mt-12"
+                className="bg-white/60 backdrop-blur-xl border border-slate-200/50 rounded-[2.5rem] p-10 shadow-2xl mt-12"
             >
                 <div className="flex items-center space-x-3 mb-10">
                     <div className="p-3 bg-amber-600/10 rounded-2xl">
                         <Binary className="w-6 h-6 text-amber-400" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight">Technical Algorithm Pipeline</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Technical Algorithm Pipeline</h2>
                         <p className="text-xs text-slate-500 font-medium tracking-wide mt-1">Step-by-step logic flow for Hybrid AI Ensemble</p>
                     </div>
                 </div>
@@ -323,14 +323,14 @@ const TechnicalReview = () => {
                         { step: '04', title: 'Conflict Res', desc: 'IoU-based Ensemble merge. Highest confidence result or critical semantic tag (Fire/Injury) wins.', icon: ShieldCheck },
                         { step: '05', title: 'Persistence', desc: 'Alert is serialized with technical reasoning, 30fps evidence saved, and pushed to WebSocket.', icon: Database }
                     ].map((item, i) => (
-                        <div key={i} className="bg-slate-800/30 p-8 rounded-[2rem] border border-white/5 relative group hover:border-amber-500/40 transition-all hover:-translate-y-1">
+                        <div key={i} className="bg-slate-50/30 p-8 rounded-[2rem] border border-white/5 relative group hover:border-amber-500/40 transition-all hover:-translate-y-1">
                             <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-100 transition-opacity">
                                 <item.icon className="w-12 h-12 text-amber-500/20" />
                             </div>
                             <div className="relative z-10">
                                 <div className="text-[10px] font-black text-amber-500 font-mono tracking-widest mb-6 block uppercase">{item.step} — Logic Phase</div>
-                                <h3 className="text-lg font-bold text-white mb-4">{item.title}</h3>
-                                <p className="text-[11px] text-slate-400 leading-relaxed font-medium uppercase tracking-tight">{item.desc}</p>
+                                <h3 className="text-lg font-bold text-slate-900 mb-4">{item.title}</h3>
+                                <p className="text-[11px] text-slate-500 leading-relaxed font-medium uppercase tracking-tight">{item.desc}</p>
                             </div>
                         </div>
                     ))}
@@ -341,3 +341,4 @@ const TechnicalReview = () => {
 };
 
 export default TechnicalReview;
+

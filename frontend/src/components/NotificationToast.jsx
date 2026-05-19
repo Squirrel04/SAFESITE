@@ -33,7 +33,7 @@ const NotificationToast = ({ notification, onDismiss }) => {
           {getIcon()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-slate-900">
             {alert_type}
           </p>
           <p className="mt-1 text-sm text-gray-300">
@@ -57,3 +57,4 @@ const NotificationToast = ({ notification, onDismiss }) => {
 };
 
 export default NotificationToast;
+

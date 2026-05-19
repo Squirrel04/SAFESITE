@@ -19,14 +19,14 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="h-screen w-64 bg-slate-900/40 backdrop-blur-3xl border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
+        <div className="h-screen w-64 bg-white/80 backdrop-blur-3xl border-r border-slate-200 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
             {/* Brand */}
-            <div className="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-900/20">
+            <div className="h-20 flex items-center px-6 border-b border-slate-200 bg-white/20">
                 <div className="w-10 h-10 bg-amber-600 rounded-xl mr-3 shadow-lg flex items-center justify-center relative overflow-hidden">
-                    <Camera className="w-5 h-5 text-white" />
+                    <Camera className="w-5 h-5 text-slate-900" />
                 </div>
                 <div>
-                    <h1 className="text-xl font-bold text-white tracking-tight">SafeSite</h1>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">SafeSite</h1>
                     <p className="text-[10px] text-slate-500 tracking-wider font-semibold uppercase">Monitor Pro</p>
                 </div>
             </div>
@@ -40,7 +40,7 @@ const Sidebar = () => {
                         className={({ isActive }) =>
                             `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative ${isActive
                                 ? 'bg-amber-600/10 text-amber-400 border border-amber-500/30'
-                                : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
+                                : 'text-slate-500 hover:bg-slate-50/50 hover:text-slate-700 border border-transparent'
                             }`
                         }
                     >
@@ -49,7 +49,7 @@ const Sidebar = () => {
                                 {isActive && (
                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
                                 )}
-                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-amber-400' : 'group-hover:text-slate-300'}`} />
+                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-amber-400' : 'group-hover:text-slate-600'}`} />
                                 <span className={`text-sm font-medium tracking-wide ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
                             </>
                         )}
@@ -58,7 +58,7 @@ const Sidebar = () => {
             </nav>
 
             {/* Recent Alerts Panel */}
-            <div className="flex-1 flex flex-col min-h-0 border-t border-slate-800/50">
+            <div className="flex-1 flex flex-col min-h-0 border-t border-slate-200/50">
                 <div className="px-6 py-4 flex items-center justify-between">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Recent Alerts</h2>
                     <Bell className="w-3 h-3 text-amber-500/50" />
@@ -85,7 +85,7 @@ const Sidebar = () => {
                                         }`}>
                                             {alert.alert_type}
                                         </p>
-                                        <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                                        <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
                                             {alert.message}
                                         </p>
                                     </div>
@@ -98,7 +98,7 @@ const Sidebar = () => {
                                     </button>
                                 </div>
                                 <div className="mt-2 flex items-center text-[8px] text-slate-600 font-mono">
-                                    <span className="bg-slate-800 px-1.5 py-0.5 rounded mr-auto">CAM 0{alert.camera_id}</span>
+                                    <span className="bg-slate-50 px-1.5 py-0.5 rounded mr-auto">CAM 0{alert.camera_id}</span>
                                     <span>{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
@@ -112,3 +112,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+

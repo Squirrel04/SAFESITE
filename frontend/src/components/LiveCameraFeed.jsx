@@ -65,10 +65,10 @@ const LiveCameraFeed = ({ id, location }) => {
                         {status === 'online' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>}
                         <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
                     </span>
-                    <span className="text-xs font-medium text-white shadow-sm drop-shadow-md tracking-wide">{location}</span>
+                    <span className="text-xs font-medium text-slate-900 shadow-sm drop-shadow-md tracking-wide">{location}</span>
                 </div>
                 {status === 'offline' && (
-                    <button onClick={() => { setStatus('connecting'); connect(); }} className="text-white/80 hover:text-white transition-colors bg-white/10 p-1 rounded-full backdrop-blur-sm hover:bg-white/20">
+                    <button onClick={() => { setStatus('connecting'); connect(); }} className="text-slate-900/80 hover:text-slate-900 transition-colors bg-white/10 p-1 rounded-full backdrop-blur-sm hover:bg-white/20">
                         <RefreshCw className="w-3.5 h-3.5" />
                     </button>
                 )}
@@ -131,7 +131,7 @@ const LiveCameraFeed = ({ id, location }) => {
             <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <p className="text-[10px] text-gray-400 font-mono bg-black/40 px-2 py-0.5 rounded backdrop-blur-sm">ID: {id}</p>
                 <div className="flex space-x-2">
-                    <button className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-105 active:scale-95">
+                    <button className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-900 backdrop-blur-sm transition-all hover:scale-105 active:scale-95">
                         <Maximize2 className="w-3.5 h-3.5" />
                     </button>
                 </div>
@@ -141,3 +141,4 @@ const LiveCameraFeed = ({ id, location }) => {
 };
 
 export default LiveCameraFeed;
+

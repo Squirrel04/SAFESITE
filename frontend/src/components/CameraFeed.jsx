@@ -6,7 +6,7 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
 
     return (
         <div
-            className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 group"
+            className="relative rounded-2xl overflow-hidden bg-white border border-slate-200 group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -16,22 +16,22 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
                     <span className={`flex h-2 w-2 rounded-full ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}>
                         <span className={`animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-75 ${status === 'online' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
                     </span>
-                    <span className="text-xs font-medium text-white shadow-sm">{location}</span>
+                    <span className="text-xs font-medium text-slate-900 shadow-sm">{location}</span>
                 </div>
-                <button className="text-white/80 hover:text-white">
+                <button className="text-slate-900/80 hover:text-slate-900">
                     <MoreVertical className="w-4 h-4" />
                 </button>
             </div>
 
             {/* Video Placeholder */}
-            <div className="aspect-video bg-slate-800 relative flex items-center justify-center">
+            <div className="aspect-video bg-slate-50 relative flex items-center justify-center">
                 {status === 'online' ? (
                     // In a real app, this would be an <img src="stream_url" /> or <video>
                     <div className="w-full h-full relative">
                         <div className="absolute inset-0 bg-gradient-to-tr from-yellow-900/10 to-transparent"></div>
                         {/* Simulated content */}
                         <div className="absolute bottom-4 left-4">
-                            <p className="text-xs text-slate-400 font-mono">CAM-{id} • 1080p • 30FPS</p>
+                            <p className="text-xs text-slate-500 font-mono">CAM-{id} • 1080p • 30FPS</p>
                         </div>
                     </div>
                 ) : (
@@ -44,10 +44,10 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
 
             {/* Control Overlay */}
             <div className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-end space-x-2 transition-transform duration-300 ${isHovered ? 'translate-y-0' : 'translate-y-full'}`}>
-                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-colors">
+                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-900 backdrop-blur-sm transition-colors">
                     <Camera className="w-4 h-4" />
                 </button>
-                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-colors">
+                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-900 backdrop-blur-sm transition-colors">
                     <Maximize2 className="w-4 h-4" />
                 </button>
             </div>
@@ -56,3 +56,4 @@ const CameraFeed = ({ id, location, status = 'online' }) => {
 };
 
 export default CameraFeed;
+

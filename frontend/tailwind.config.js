@@ -22,7 +22,8 @@ export default {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
+                sans: ['Satoshi', 'Inter', 'sans-serif'],
+                inter: ['Inter', 'sans-serif'],
             }
         },
     },

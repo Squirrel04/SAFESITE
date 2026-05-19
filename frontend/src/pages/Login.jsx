@@ -38,7 +38,7 @@ const Login = () => {
                 className="w-full max-w-md p-8 relative z-10"
             >
                 {/* Glass frame */}
-                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                <div className="bg-white/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
                     <div className="flex justify-center mb-8">
                         <motion.div 
                             initial={{ scale: 0.8, rotate: -10 }}
@@ -46,12 +46,12 @@ const Login = () => {
                             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                             className="w-16 h-16 bg-gradient-to-tr from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/30"
                         >
-                            <Shield className="w-8 h-8 text-white" />
+                            <Shield className="w-8 h-8 text-slate-900" />
                         </motion.div>
                     </div>
 
-                    <h2 className="text-3xl font-bold text-center text-white mb-2 tracking-tight">Welcome Back</h2>
-                    <p className="text-slate-400 text-center mb-8 text-sm">Secure access to SafeSite Monitor</p>
+                    <h2 className="text-3xl font-bold text-center text-slate-900 mb-2 tracking-tight">Welcome Back</h2>
+                    <p className="text-slate-500 text-center mb-8 text-sm">Secure access to SafeSite Monitor</p>
 
                     {error && (
                         <motion.div 
@@ -70,7 +70,7 @@ const Login = () => {
                             </div>
                             <input
                                 type="text"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -84,7 +84,7 @@ const Login = () => {
                             </div>
                             <input
                                 type="password"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -118,3 +118,4 @@ const Login = () => {
 };
 
 export default Login;
+
