@@ -7,6 +7,8 @@ import api from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
 import { useNotifications } from '../context/NotificationContext';
+import CinematicHero from '../components/CinematicHero';
+
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -67,25 +69,9 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-8">
-            {/* Page Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-            >
-                <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl shadow-xl relative group">
-                        <div className="absolute inset-0 bg-white/20 skew-x-[-20deg] translate-x-[-150%] animate-[shine_3s_infinite]" />
-                        <Shield className="w-8 h-8 text-slate-900 relative z-10" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                            Safety Monitor
-                        </h1>
-                        <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Real-time surveillance and anomaly detection system.</p>
-                    </div>
-                </div>
-            </motion.div>
+            {/* Cinematic Video Background Hero Header */}
+            <CinematicHero />
+
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

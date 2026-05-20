@@ -2,10 +2,11 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import WalkingWorkers from './WalkingWorkers';
 
 const MainLayout = () => {
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-yellow-500/30">
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-yellow-500/30 relative">
             <Sidebar />
             <TopBar />
             <main className="ml-64 p-8 relative z-50">
@@ -16,6 +17,9 @@ const MainLayout = () => {
                     <Outlet />
                 </div>
             </main>
+
+            {/* Tiny 3D construction workers walking around the website */}
+            <WalkingWorkers />
         </div>
     );
 };

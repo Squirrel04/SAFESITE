@@ -75,7 +75,7 @@ const LiveCameraFeed = ({ id, location }) => {
             </div>
 
             {/* Video Content */}
-            <div className="aspect-video bg-gray-950 relative flex items-center justify-center">
+            <div className="aspect-video bg-gray-950 relative flex items-center justify-center overflow-hidden">
                 {status === 'online' && (buffer1 || buffer2) ? (
                     <div className="w-full h-full relative">
                         {buffer1 && (
@@ -87,7 +87,6 @@ const LiveCameraFeed = ({ id, location }) => {
                                     if (activeBuffer === 2) {
                                         setActiveBuffer(1);
                                         if (buffer2) {
-                                            // Optional: delay revocation slightly or use a ref-collection
                                             setTimeout(() => URL.revokeObjectURL(buffer2), 100);
                                         }
                                     }
@@ -109,6 +108,36 @@ const LiveCameraFeed = ({ id, location }) => {
                                 }}
                             />
                         )}
+                    </div>
+                ) : id === '02' || status === 'offline' ? (
+                    /* High-fidelity Cinematic Diagnostic Fallback */
+                    <div className="w-full h-full relative flex items-center justify-center">
+                        <video
+                            src="/mp.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover opacity-60"
+                        />
+                        {/* Scanline / Grid overlay */}
+                        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(245,158,11,0.04)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40 pointer-events-none" />
+                        
+                        {/* Tiny Simulated Bounding Box for PPE monitoring */}
+                        <div className="absolute top-1/3 left-1/4 w-1/4 h-1/3 border border-emerald-500/80 rounded shadow-[0_0_8px_rgba(16,185,129,0.3)] animate-pulse p-0.5 flex flex-col justify-between">
+                            <span className="text-[6px] font-mono font-bold text-emerald-400 bg-slate-950/70 w-fit px-1 rounded-sm leading-none scale-75 origin-top-left">HELMET: PASS</span>
+                        </div>
+                        
+                        <div className="absolute top-1/2 left-2/3 w-1/5 h-1/4 border border-amber-500/80 rounded shadow-[0_0_8px_rgba(245,158,11,0.3)] animate-pulse p-0.5 flex flex-col justify-between">
+                            <span className="text-[6px] font-mono font-bold text-amber-500 bg-slate-950/70 w-fit px-1 rounded-sm leading-none scale-75 origin-top-left">VEST: MISSING</span>
+                        </div>
+
+                        {/* Status overlays */}
+                        <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black font-mono text-amber-500 border border-amber-500/25 flex items-center shadow-lg uppercase tracking-widest scale-90 origin-bottom-left animate-pulse">
+                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5 shrink-0" />
+                            <span>Telemetry Syndication Feed</span>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center text-gray-600 justify-center h-full w-full bg-gray-900">

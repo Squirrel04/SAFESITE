@@ -210,26 +210,18 @@ const ViolationDetails = ({ id: propId, onClose }) => {
 
                             {/* Video Evidence */}
                             <div className="aspect-video bg-black relative overflow-hidden group no-export">
-                                {violation.video_url ? (
-                                    <video
-                                        src={violation.video_url.startsWith('http') ? violation.video_url : `http://localhost:8000${violation.video_url}`}
-                                        controls
-                                        className="w-full h-full object-cover"
-                                        poster={violation.image_url}
-                                    />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                                        <div className="relative">
-                                            <AlertTriangle className="w-10 h-10 mb-2 opacity-20 text-amber-500" />
-                                            <div className="absolute top-0 right-0 w-2 h-2 bg-amber-500 rounded-full animate-ping" />
-                                        </div>
-                                        <p className="text-xs font-bold uppercase tracking-widest opacity-40 leading-none">Live Playback</p>
-                                        <p className="text-[10px] opacity-30 mt-1 italic tracking-[0.2em]">Syndicating Clip...</p>
-                                    </div>
-                                )}
+                                <video
+                                    src={violation.video_url ? (violation.video_url.startsWith('http') ? violation.video_url : `http://localhost:8000${violation.video_url}`) : "/mp.mp4"}
+                                    controls
+                                    autoPlay
+                                    loop
+                                    muted
+                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                    poster={violation.image_url}
+                                />
                                 <div className="absolute top-4 left-4">
-                                    <span className="bg-amber-600/80 backdrop-blur-md text-slate-900 text-[9px] font-bold px-3 py-1 rounded-full border border-white/10 uppercase tracking-[0.2em] flex items-center">
-                                        <div className="w-1.5 h-1.5 bg-white rounded-full mr-2 animate-pulse" /> Recording
+                                    <span className="bg-amber-600/85 backdrop-blur-md text-slate-950 text-[9px] font-black px-3 py-1 rounded-full border border-amber-500/30 uppercase tracking-[0.2em] flex items-center shadow-lg">
+                                        <div className="w-1.5 h-1.5 bg-slate-950 rounded-full mr-2 animate-pulse" /> Recording Fallback
                                     </span>
                                 </div>
                             </div>

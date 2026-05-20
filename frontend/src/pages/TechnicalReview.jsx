@@ -14,6 +14,7 @@ import {
     Binary
 } from 'lucide-react';
 import api from '../services/api';
+import { SittingWorker } from '../components/WalkingWorkers';
 
 const TechnicalReview = () => {
     const [stats, setStats] = useState({
@@ -90,10 +91,10 @@ const TechnicalReview = () => {
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-amber-600/5 border border-amber-500/20 rounded-[2.5rem] p-10 backdrop-blur-xl relative overflow-hidden group shadow-2xl"
+                className="bg-amber-600/5 border border-amber-500/20 rounded-[2.5rem] p-8 md:p-10 backdrop-blur-xl relative overflow-hidden group shadow-2xl"
             >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[100px] pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 relative z-10">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 md:gap-10 relative z-10">
                     <div className="flex-1">
                         <div className="flex items-center space-x-2 text-amber-400 mb-4">
                             <Sparkles className="w-4 h-4" />
@@ -104,17 +105,52 @@ const TechnicalReview = () => {
                             Based on the latest semantic reasoning from the **Gemini 1.5 Flash** hybrid pass: Site safety is currently <span className="text-amber-500 font-bold uppercase italic underline decoration-amber-500/40 underline-offset-4 tracking-tighter">Optimized</span> with high detection fidelity. System is actively enforcing **Unauthorized Zone** boundaries, **PPE Compliance** (Helmet/Vest/Harness), and **Heavy Machinery Exclusion Zones**.
                         </p>
                     </div>
-                    <div className="flex gap-4">
-                        <div className="bg-slate-900/80 p-6 rounded-3xl border border-amber-500/20 backdrop-blur-md shadow-xl">
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                            <div className="flex items-center text-amber-500 font-black text-xl italic uppercase tracking-tighter">
-                                <ShieldCheck className="w-5 h-5 mr-1" /> ACTIVE
+
+                    {/* Mini Cinematic Telemetry Live Scan and Statuses */}
+                    <div className="flex flex-col sm:flex-row lg:flex-col gap-4 items-center shrink-0 w-full lg:w-72">
+                        {/* Live telemetry diagnostic clip */}
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-amber-500/30 bg-slate-950 shadow-2xl group/diag flex items-center justify-center">
+                            <video
+                                src="/mp.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover/diag:opacity-80 transition-opacity"
+                            />
+                            {/* Scanning HUD grid overlay */}
+                            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(245,158,11,0.05)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40 pointer-events-none" />
+                            
+                            {/* Scanline Sweep animation */}
+                            <div className="absolute top-0 left-0 w-full h-0.5 bg-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-[scanline_3s_linear_infinite]" />
+                            
+                            {/* Visual Bounding Box to simulate YOLO detection */}
+                            <div className="absolute top-1/4 left-1/3 w-1/3 h-1/2 border-2 border-amber-500/80 rounded-lg shadow-[0_0_12px_rgba(245,158,11,0.4)] pointer-events-none animate-pulse flex flex-col justify-between p-1">
+                                <span className="text-[7px] font-black text-amber-500 bg-slate-950/80 px-1 py-0.5 rounded leading-none w-fit font-mono">WORKER_PPE: 98%</span>
+                                <span className="text-[6px] font-bold text-emerald-400 bg-slate-950/80 px-1 py-0.5 rounded leading-none w-fit ml-auto font-mono">HELMET: PASS</span>
+                            </div>
+
+                            {/* Telemetry labels */}
+                            <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center text-[7px] font-black font-mono text-slate-300 bg-slate-950/60 backdrop-blur-sm px-2 py-1 rounded border border-slate-700/50">
+                                <span className="text-amber-500 animate-pulse">● VLM_SEMANTIC_STREAM</span>
+                                <span>FPS: 30.00</span>
                             </div>
                         </div>
-                        <div className="bg-slate-900/80 p-6 rounded-3xl border border-amber-500/20 backdrop-blur-md shadow-xl">
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fidelity</p>
-                            <div className="flex items-center text-white font-black text-xl italic uppercase tracking-tighter">
-                                <Activity className="w-5 h-5 mr-1 text-amber-500" /> HIGH
+
+                        {/* Status Badges Grid */}
+                        <div className="grid grid-cols-2 gap-3 w-full">
+                            <div className="bg-slate-900/80 p-4 rounded-2xl border border-amber-500/20 backdrop-blur-md shadow-xl flex flex-col justify-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Status</p>
+                                <div className="flex items-center text-amber-500 font-black text-sm italic uppercase tracking-tighter">
+                                    <ShieldCheck className="w-4 h-4 mr-1 shrink-0" /> ACTIVE
+                                </div>
+                            </div>
+                            <div className="bg-slate-900/80 p-4 rounded-2xl border border-amber-500/20 backdrop-blur-md shadow-xl flex flex-col justify-center">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Fidelity</p>
+                                <div className="flex items-center text-white font-black text-sm italic uppercase tracking-tighter">
+                                    <Activity className="w-4 h-4 mr-1 text-amber-500 shrink-0" /> HIGH
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -284,16 +320,19 @@ const TechnicalReview = () => {
                     </div>
 
                     {/* GPU/Resource Load (Decorative) */}
-                    <div className="bg-gradient-to-br from-amber-500/5 to-yellow-600/5 border border-slate-200/50 rounded-[2rem] p-6">
+                    <div className="bg-gradient-to-br from-amber-500/5 to-yellow-600/5 border border-slate-700/50 rounded-[2rem] p-6 relative overflow-visible">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Neural Compute Load</span>
                             <span className="text-[10px] text-amber-400 font-mono">42ms Latency</span>
                         </div>
-                        <div className="h-1.5 bg-slate-50 rounded-full overflow-hidden flex gap-0.5">
+                        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden flex gap-0.5">
                             <div className="h-full bg-amber-500 w-[60%]" />
                             <div className="h-full bg-yellow-500 w-[15%]" />
-                            <div className="h-full bg-slate-700 w-[25%]" />
+                            <div className="h-full bg-slate-700/50 w-[25%]" />
                         </div>
+                        
+                        {/* Sitting 3D Worker Easter Egg */}
+                        <SittingWorker />
                     </div>
                 </motion.div>
             </div>
