@@ -121,10 +121,10 @@ const Alerts = () => {
                         <AlertTriangle className="w-8 h-8 text-slate-900 relative z-10" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
                             Evidence Log
                         </h1>
-                        <p className="text-slate-500 mt-1 font-medium text-sm tracking-wide">Secure historical record of safety violations.</p>
+                        <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Secure historical record of safety violations.</p>
                     </div>
                 </div>
 
@@ -144,16 +144,16 @@ const Alerts = () => {
                     <button
                         onClick={handleClearAll}
                         disabled={isDeleting || alerts.length === 0}
-                        className="flex items-center px-4 py-2 bg-slate-50/80 hover:bg-slate-700 text-slate-600 border border-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider transition-all group"
+                        className="flex items-center px-4 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-all group"
                     >
-                        <ShieldAlert className="w-4 h-4 mr-2 group-hover:text-amber-400 transition-colors" />
+                        <ShieldAlert className="w-4 h-4 mr-2 group-hover:text-amber-500 transition-colors" />
                         Clear All Log
                     </button>
                 </div>
             </motion.div>
 
             <motion.div
-                className="bg-white/80 backdrop-blur-xl border border-slate-200 rounded-3xl overflow-hidden shadow-xl"
+                className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-xl"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -161,11 +161,11 @@ const Alerts = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-300/50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
+                            <tr className="bg-slate-800/50 border-b border-slate-700/50 text-slate-400 text-xs uppercase tracking-wider font-semibold">
                                 <th className="p-5 w-10">
                                     <input 
                                         type="checkbox" 
-                                        className="w-4 h-4 rounded border-slate-300 bg-white focus:ring-yellow-500/50 text-yellow-600"
+                                        className="w-4 h-4 rounded border-slate-700 bg-slate-900 focus:ring-amber-500/50 text-amber-500"
                                         checked={alerts.length > 0 && selectedIds.size === alerts.length}
                                         onChange={toggleSelectAll}
                                     />
@@ -190,13 +190,13 @@ const Alerts = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className={`hover:bg-slate-50/30 transition-colors group cursor-pointer ${selectedIds.has(alert.id) ? 'bg-yellow-500/5' : ''}`}
+                                        className={`hover:bg-slate-800/30 transition-colors group cursor-pointer ${selectedIds.has(alert.id) ? 'bg-amber-500/5' : ''}`}
                                         onClick={() => setSelectedAlertId(selectedAlertId === alert.id ? null : alert.id)}
                                     >
                                         <td className="p-5" onClick={(e) => e.stopPropagation()}>
                                             <input 
                                                 type="checkbox" 
-                                                className="w-4 h-4 rounded border-slate-300 bg-white focus:ring-yellow-500/50 text-yellow-600"
+                                                className="w-4 h-4 rounded border-slate-700 bg-slate-900 focus:ring-amber-500/50 text-amber-500"
                                                 checked={selectedIds.has(alert.id)}
                                                 onChange={() => toggleSelect(alert.id)}
                                             />
@@ -224,11 +224,11 @@ const Alerts = () => {
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center space-x-2">
-                                                        <p className="font-bold text-slate-700 text-sm tracking-wide group-hover:text-slate-900 transition-colors">
+                                                        <p className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-white transition-colors">
                                                             {alert.alert_type}
                                                         </p>
                                                         {alert.video_url && (
-                                                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.6)]" title="Video Evidence Available" />
+                                                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]" title="Video Evidence Available" />
                                                         )}
                                                     </div>
                                                     <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border mt-0.5 inline-block ${getSeverityColor(alert.severity)}`}>
@@ -237,16 +237,16 @@ const Alerts = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-slate-500 font-medium text-sm group-hover:text-slate-600 transition-colors max-w-xs">
+                                        <td className="p-5 text-slate-400 font-medium text-sm group-hover:text-slate-300 transition-colors max-w-xs">
                                             {alert.message}
                                         </td>
                                         <td className="p-5">
-                                            <div className="flex items-center text-slate-500 text-sm font-mono">
-                                                <Camera className="w-3.5 h-3.5 mr-2 text-yellow-500" />
-                                                <span className="group-hover:text-yellow-400 transition-colors">CAM-{alert.camera_id}</span>
+                                            <div className="flex items-center text-slate-400 text-sm font-mono">
+                                                <Camera className="w-3.5 h-3.5 mr-2 text-amber-500" />
+                                                <span className="group-hover:text-amber-400 transition-colors">CAM-{alert.camera_id}</span>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-slate-500 text-sm font-mono tracking-wider group-hover:text-slate-500 transition-colors">
+                                        <td className="p-5 text-slate-400 text-sm font-mono tracking-wider group-hover:text-slate-300 transition-colors">
                                             {new Date(alert.timestamp).toLocaleString(undefined, {
                                                 month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'
                                             })}
@@ -255,14 +255,14 @@ const Alerts = () => {
                                             <div className="flex items-center justify-end space-x-2">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setSelectedAlertId(selectedAlertId === alert.id ? null : alert.id); }}
-                                                    className="px-3 py-1.5 bg-slate-50/80 hover:bg-yellow-500/20 text-slate-600 hover:text-yellow-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border border-slate-300 hover:border-yellow-500/30 flex items-center shadow-sm"
+                                                    className="px-3 py-1.5 bg-slate-800/80 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border border-slate-700 hover:border-amber-500/30 flex items-center shadow-sm"
                                                 >
                                                     <Eye className="w-3.5 h-3.5 mr-1.5" />
                                                     View
                                                 </button>
                                                 <button
                                                     onClick={(e) => handleDeleteItem(e, alert.id)}
-                                                    className="p-1.5 bg-slate-50/80 hover:bg-amber-500/20 text-slate-500 hover:text-amber-400 rounded-lg transition-all border border-slate-300 hover:border-amber-500/30"
+                                                    className="p-1.5 bg-slate-800/80 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-lg transition-all border border-slate-700 hover:border-red-500/30"
                                                     title="Delete"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
@@ -281,7 +281,7 @@ const Alerts = () => {
                                                 className="bg-slate-950/50 border-b border-slate-300/50"
                                             >
                                                 <td colSpan="7" className="p-0">
-                                                    <div className="p-6 border-l-2 border-yellow-500 overflow-hidden shadow-inner bg-white/80">
+                                                    <div className="p-6 border-l-2 border-amber-500 overflow-hidden shadow-inner bg-slate-900/80">
                                                         <ViolationDetails 
                                                             id={alert.id} 
                                                             onClose={() => setSelectedAlertId(null)} 

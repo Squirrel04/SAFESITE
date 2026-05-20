@@ -63,3 +63,7 @@ ai_service/*.pt
 
 # Seed / debug scripts
 backend/seed_alerts.py
+
+# Local database
+data/
+

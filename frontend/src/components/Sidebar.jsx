@@ -19,15 +19,15 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="h-screen w-64 bg-white/80 backdrop-blur-3xl border-r border-slate-200 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
+        <div className="h-screen w-64 bg-slate-950/80 backdrop-blur-3xl border-r border-slate-800/50 flex flex-col fixed left-0 top-0 z-40 shadow-2xl">
             {/* Brand */}
-            <div className="h-20 flex items-center px-6 border-b border-slate-200 bg-white/20">
-                <div className="w-10 h-10 bg-amber-600 rounded-xl mr-3 shadow-lg flex items-center justify-center relative overflow-hidden">
-                    <Camera className="w-5 h-5 text-slate-900" />
+            <div className="h-20 flex items-center px-6 border-b border-slate-800/50 bg-slate-900/50">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl mr-3 shadow-[0_0_15px_rgba(245,158,11,0.5)] flex items-center justify-center relative overflow-hidden">
+                    <Camera className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">SafeSite</h1>
-                    <p className="text-[10px] text-slate-500 tracking-wider font-semibold uppercase">Monitor Pro</p>
+                    <h1 className="text-xl font-bold text-white tracking-tight">SafeSite</h1>
+                    <p className="text-[10px] text-amber-500/80 tracking-wider font-semibold uppercase">Monitor Pro</p>
                 </div>
             </div>
 
@@ -38,19 +38,19 @@ const Sidebar = () => {
                         key={item.path}
                         to={item.path}
                         className={({ isActive }) =>
-                            `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative ${isActive
-                                ? 'bg-amber-600/10 text-amber-400 border border-amber-500/30'
-                                : 'text-slate-500 hover:bg-slate-50/50 hover:text-slate-700 border border-transparent'
+                            `flex items-center px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${isActive
+                                ? 'bg-gradient-to-r from-amber-600/20 to-orange-500/5 text-amber-400 border border-amber-500/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]'
+                                : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
                             }`
                         }
                     >
                         {({ isActive }) => (
                             <>
                                 {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-500 rounded-r-full" />
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500 rounded-r-full shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
                                 )}
-                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-amber-400' : 'group-hover:text-slate-600'}`} />
-                                <span className={`text-sm font-medium tracking-wide ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
+                                <item.icon className={`w-4 h-4 mr-3 transition-colors ${isActive ? 'text-amber-400' : 'group-hover:text-slate-300'}`} />
+                                <span className={`text-sm font-medium tracking-wide ${isActive ? 'font-semibold text-amber-400' : ''}`}>{item.label}</span>
                             </>
                         )}
                     </NavLink>
@@ -58,7 +58,7 @@ const Sidebar = () => {
             </nav>
 
             {/* Recent Alerts Panel */}
-            <div className="flex-1 flex flex-col min-h-0 border-t border-slate-200/50">
+            <div className="flex-1 flex flex-col min-h-0 border-t border-slate-800/50">
                 <div className="px-6 py-4 flex items-center justify-between">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Recent Alerts</h2>
                     <Bell className="w-3 h-3 text-amber-500/50" />
@@ -72,33 +72,34 @@ const Sidebar = () => {
                         alerts.map((alert) => (
                             <div 
                                 key={alert.id}
-                                className={`p-3 rounded-xl border transition-all duration-300 group ${
+                                className={`p-3 rounded-xl border transition-all duration-300 group relative overflow-hidden backdrop-blur-sm ${
                                     alert.severity === 'high' 
-                                    ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30' 
-                                    : 'bg-orange-500/5 border-orange-500/10 hover:border-orange-500/30'
+                                    ? 'bg-gradient-to-br from-amber-500/10 to-red-500/5 border-amber-500/20 hover:border-amber-500/50 hover:shadow-[0_4px_15px_-3px_rgba(245,158,11,0.2)]' 
+                                    : 'bg-gradient-to-br from-orange-500/10 to-yellow-500/5 border-orange-500/20 hover:border-orange-500/50 hover:shadow-[0_4px_15px_-3px_rgba(249,115,22,0.2)]'
                                 }`}
                             >
-                                <div className="flex justify-between items-start gap-2">
+                                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                                <div className="flex justify-between items-start gap-2 relative z-10">
                                     <div className="min-w-0">
                                         <p className={`text-[11px] font-bold truncate ${
                                             alert.severity === 'high' ? 'text-amber-400' : 'text-orange-400'
                                         }`}>
                                             {alert.alert_type}
                                         </p>
-                                        <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                        <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
                                             {alert.message}
                                         </p>
                                     </div>
                                     <button 
                                         onClick={() => dismissAlert(alert.id)}
-                                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-amber-400 transition-all"
+                                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-amber-400 transition-all bg-slate-900/50 rounded-full"
                                         title="Ignore"
                                     >
                                         <XCircle className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
-                                <div className="mt-2 flex items-center text-[8px] text-slate-600 font-mono">
-                                    <span className="bg-slate-50 px-1.5 py-0.5 rounded mr-auto">CAM 0{alert.camera_id}</span>
+                                <div className="mt-2 flex items-center text-[8px] text-slate-500 font-mono relative z-10">
+                                    <span className="bg-slate-800/80 border border-slate-700/50 text-slate-300 px-1.5 py-0.5 rounded mr-auto">CAM 0{alert.camera_id}</span>
                                     <span>{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>

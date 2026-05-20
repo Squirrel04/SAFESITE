@@ -17,14 +17,14 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
     return (
         <div 
             onClick={onClick}
-            className="relative overflow-hidden rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-200 p-6 group hover:border-slate-300 hover:bg-white/60 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1"
+            className="relative overflow-hidden rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 p-6 group hover:border-amber-500/30 hover:bg-slate-800/60 transition-all duration-300 shadow-xl cursor-pointer hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:-translate-y-1"
         >
             <div className="flex items-center justify-between relative z-10">
                 <div>
-                    <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">{title}</p>
-                    <p className="text-4xl font-bold text-slate-900 mt-2 tracking-tight drop-shadow-sm">{value}</p>
+                    <p className="text-sm font-semibold text-slate-400 tracking-wide uppercase">{title}</p>
+                    <p className="text-4xl font-bold text-white mt-2 tracking-tight drop-shadow-sm">{value}</p>
                 </div>
-                <div className={`p-4 rounded-2xl bg-slate-50/50 border border-slate-300/50 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                <div className={`p-4 rounded-2xl bg-slate-800/80 border border-slate-700/50 group-hover:scale-110 transition-transform duration-300 shadow-inner group-hover:border-amber-500/20`}>
                     <Icon className={`w-7 h-7 ${textClass}`} />
                 </div>
             </div>
@@ -34,7 +34,7 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
 
             {trend !== undefined && (
                 <div className="mt-6 flex items-center text-sm relative z-10">
-                    <span className={`font-semibold px-2 py-1 rounded-md bg-opacity-10 backdrop-blur-sm shadow-sm ${trend > 0 ? 'text-yellow-400 bg-yellow-500 border border-yellow-500/20' : 'text-amber-400 bg-amber-500 border border-amber-500/20'}`}>
+                    <span className={`font-semibold px-2 py-1 rounded-md bg-opacity-10 backdrop-blur-sm shadow-sm ${trend > 0 ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border border-amber-500/20'}`}>
                         {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}%
                     </span>
                     <span className="text-slate-500 ml-3 font-medium text-[13px] tracking-wide uppercase">from last hour</span>
@@ -42,7 +42,7 @@ const StatCard = ({ title, value, icon: Icon, trend, color = 'yellow', onClick }
             )}
             {trend === undefined && (
                 <div className="mt-6 flex items-center text-sm text-slate-500 relative z-10 font-medium tracking-wide">
-                    <div className="w-2 h-2 rounded-full bg-slate-600 mr-2 -translate-y-[1px]"></div>
+                    <div className="w-2 h-2 rounded-full bg-slate-700 mr-2 -translate-y-[1px]"></div>
                     Consistent
                 </div>
             )}

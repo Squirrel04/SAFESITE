@@ -21,10 +21,10 @@ const Cameras = () => {
                     <Camera className="w-8 h-8 text-slate-900 relative z-10" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">
                         Live Feeds
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium text-sm tracking-wide">Real-time AI surveillance — CAM-01 active with YOLO + Grok Scout detection.</p>
+                    <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Real-time AI surveillance — CAM-01 active with YOLO + Grok Scout detection.</p>
                 </div>
             </motion.div>
 
@@ -40,12 +40,12 @@ const Cameras = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="relative group bg-white/80 backdrop-blur-xl p-2 rounded-3xl border border-slate-200 shadow-xl overflow-hidden hover:border-slate-300 hover:bg-white/60 transition-all duration-300"
+                        className="relative group bg-slate-900/40 backdrop-blur-xl p-2 rounded-3xl border border-slate-700/50 shadow-[0_0_20px_rgba(245,158,11,0.05)] overflow-hidden hover:border-amber-500/30 hover:bg-slate-800/60 transition-all duration-300"
                     >
                         <div className="rounded-2xl overflow-hidden relative">
                             <LiveCameraFeed {...cam} />
                         </div>
-                        <div className="absolute top-6 right-6 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold font-mono tracking-wider text-slate-900 border border-slate-300/50 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg translate-y-2 group-hover:translate-y-0">
+                        <div className="absolute top-6 right-6 bg-slate-900/80 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold font-mono tracking-wider text-slate-300 border border-slate-700/50 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_15px_rgba(0,0,0,0.5)] translate-y-2 group-hover:translate-y-0">
                             CAM-{cam.id}
                         </div>
                     </motion.div>

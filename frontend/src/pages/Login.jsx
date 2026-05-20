@@ -38,20 +38,20 @@ const Login = () => {
                 className="w-full max-w-md p-8 relative z-10"
             >
                 {/* Glass frame */}
-                <div className="bg-white/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-[0_0_40px_rgba(245,158,11,0.05)]">
                     <div className="flex justify-center mb-8">
                         <motion.div 
                             initial={{ scale: 0.8, rotate: -10 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                            className="w-16 h-16 bg-gradient-to-tr from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/30"
+                            className="w-16 h-16 bg-gradient-to-tr from-amber-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.3)]"
                         >
                             <Shield className="w-8 h-8 text-slate-900" />
                         </motion.div>
                     </div>
 
-                    <h2 className="text-3xl font-bold text-center text-slate-900 mb-2 tracking-tight">Welcome Back</h2>
-                    <p className="text-slate-500 text-center mb-8 text-sm">Secure access to SafeSite Monitor</p>
+                    <h2 className="text-3xl font-bold text-center text-white mb-2 tracking-tight">Welcome Back</h2>
+                    <p className="text-slate-400 text-center mb-8 text-sm">Secure access to SafeSite Monitor</p>
 
                     {error && (
                         <motion.div 
@@ -70,7 +70,7 @@ const Login = () => {
                             </div>
                             <input
                                 type="text"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium"
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -84,7 +84,7 @@ const Login = () => {
                             </div>
                             <input
                                 type="password"
-                                className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-500 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all font-medium"
+                                className="w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -95,10 +95,10 @@ const Login = () => {
                         <button 
                             type="submit" 
                             disabled={isLoading}
-                            className="w-full relative group overflow-hidden bg-white text-slate-950 py-3.5 rounded-xl font-bold tracking-wide flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed hover:bg-yellow-50 transition-colors mt-8"
+                            className="w-full relative group overflow-hidden bg-amber-500 text-slate-950 py-3.5 rounded-xl font-bold tracking-wide flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed hover:bg-amber-400 transition-colors mt-8 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]"
                         >
                             {/* Hover effect gradient */}
-                            <div className="absolute inset-0 w-1/4 h-full bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent skew-x-[-20deg] group-hover:animate-shine" />
+                            <div className="absolute inset-0 w-1/4 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg] group-hover:animate-shine" />
                             
                             <span className="flex items-center">
                                 {isLoading ? 'Authenticating...' : 'Sign In'}

@@ -122,14 +122,14 @@ const ViolationDetails = ({ id: propId, onClose }) => {
     if (!violation) {
         return (
             <div className="text-center py-20">
-                <h2 className="text-2xl font-bold text-slate-900">Violation Not Found</h2>
-                <button onClick={() => navigate('/alerts')} className="mt-4 text-amber-400 hover:underline">Return to Logs</button>
+                <h2 className="text-2xl font-bold text-white">Violation Not Found</h2>
+                <button onClick={() => navigate('/alerts')} className="mt-4 text-amber-500 hover:underline">Return to Logs</button>
             </div>
         );
     }
 
     return (
-        <div ref={reportRef} className={`space-y-6 max-w-7xl mx-auto p-2 ${isModal ? 'p-6 bg-white min-h-screen' : ''}`}>
+        <div ref={reportRef} className={`space-y-6 max-w-7xl mx-auto p-2 ${isModal ? 'p-6 bg-slate-950 min-h-screen' : ''}`}>
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -139,15 +139,15 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={onClose || (() => navigate('/alerts'))}
-                        className="p-3 bg-slate-50/50 hover:bg-slate-50 rounded-2xl transition-all border border-slate-300/50 shadow-xl no-export"
+                        className="p-3 bg-slate-800/50 hover:bg-slate-700/50 rounded-2xl transition-all border border-slate-700/50 shadow-xl no-export"
                     >
-                        {isModal ? <XCircle className="w-5 h-5 text-slate-500" /> : <ArrowLeft className="w-5 h-5 text-slate-500" />}
+                        {isModal ? <XCircle className="w-5 h-5 text-slate-400" /> : <ArrowLeft className="w-5 h-5 text-slate-400" />}
                     </button>
                     <div>
-                        <h1 className="text-2xl font-black text-slate-900 leading-tight tracking-tighter italic">
-                            Incident Ref: <span className="text-amber-400">#{id.slice(-6).toUpperCase()}</span>
+                        <h1 className="text-2xl font-black text-white leading-tight tracking-tighter italic">
+                            Incident Ref: <span className="text-amber-500">#{id.slice(-6).toUpperCase()}</span>
                         </h1>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Safety Violation Intelligence Report</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Safety Violation Intelligence Report</p>
                     </div>
                 </div>
 
@@ -175,18 +175,18 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     transition={{ delay: 0.1 }}
                     className="lg:col-span-2 space-y-6"
                 >
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50/20 backdrop-blur-md">
-                            <h2 className="font-bold text-slate-900 flex items-center text-xs uppercase tracking-widest leading-none">
-                                <Camera className="w-4 h-4 mr-3 text-amber-400" />
+                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.05)] backdrop-blur-xl">
+                        <div className="p-6 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/20 backdrop-blur-md">
+                            <h2 className="font-bold text-slate-200 flex items-center text-xs uppercase tracking-widest leading-none">
+                                <Camera className="w-4 h-4 mr-3 text-amber-500" />
                                 Visual Evidence Log
                             </h2>
                             <div className="flex gap-2">
-                                <span className="text-[10px] font-black text-slate-500 bg-slate-50 border border-slate-300 px-3 py-1 rounded-full uppercase tracking-widest">CAM: {violation.camera_id}</span>
-                                {violation.video_url && <span className="text-[10px] font-black text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full uppercase tracking-widest flex items-center no-export"><div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1.5 animate-pulse" />Video Source</span>}
+                                <span className="text-[10px] font-black text-slate-400 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full uppercase tracking-widest">CAM: {violation.camera_id}</span>
+                                {violation.video_url && <span className="text-[10px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full uppercase tracking-widest flex items-center no-export"><div className="w-1.5 h-1.5 bg-amber-500 rounded-full mr-1.5 animate-pulse" />Video Source</span>}
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-800">
                             {/* Snapshot Image */}
                             <div className="aspect-video bg-black relative overflow-hidden group">
                                 {violation.image_url ? (
@@ -236,17 +236,17 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-2xl">
-                        <h2 className="text-lg font-black text-slate-900 italic tracking-tighter uppercase mb-6 flex items-center">
-                            <Shield className="w-5 h-5 mr-3 text-amber-400" /> Incident Semantic breakdown
+                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 p-8 shadow-[0_0_20px_rgba(245,158,11,0.05)] backdrop-blur-xl">
+                        <h2 className="text-lg font-black text-white italic tracking-tighter uppercase mb-6 flex items-center">
+                            <Shield className="w-5 h-5 mr-3 text-amber-500" /> Incident Semantic breakdown
                         </h2>
-                        <div className="space-y-6 text-slate-500 text-sm leading-relaxed font-medium">
+                        <div className="space-y-6 text-slate-400 text-sm leading-relaxed font-medium">
                             <p>
                                 {violation.description || 'System reasoning: Individual detected with behavioral anomalies or missing PPE equipment in high-risk zones.'}
                             </p>
-                            <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-3xl">
-                                <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-3">AI Recommendation</p>
-                                <p className="text-slate-600 text-sm italic">
+                            <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-3xl">
+                                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-3">AI Recommendation</p>
+                                <p className="text-slate-300 text-sm italic">
                                     {violation.recommendation || "Immediate safety protocol enforcement required. Site supervisor should verify worker's certification and PPE compliance before continuing tasks."}
                                 </p>
                             </div>
@@ -262,26 +262,26 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     className="space-y-6"
                 >
                     {/* Key Details Card */}
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden">
-                        <div className="p-6 bg-slate-50/20 border-b border-slate-200 backdrop-blur-md">
-                            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-[0.2em]">Incident Details</h3>
+                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 shadow-[0_0_20px_rgba(245,158,11,0.05)] overflow-hidden backdrop-blur-xl">
+                        <div className="p-6 bg-slate-800/30 border-b border-slate-700/50 backdrop-blur-md">
+                            <h3 className="font-bold text-white text-xs uppercase tracking-[0.2em]">Incident Details</h3>
                         </div>
                         <div className="p-6 space-y-6">
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Violation Type</label>
-                                <p className="text-slate-900 font-bold mt-2 text-lg tracking-tight italic">{violation.alert_type}</p>
+                                <p className="text-slate-200 font-bold mt-2 text-lg tracking-tight italic">{violation.alert_type}</p>
                             </div>
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Location</label>
-                                <div className="flex items-center mt-2 text-slate-600 font-bold">
-                                    <MapPin className="w-4 h-4 mr-2 text-amber-400" />
+                                <div className="flex items-center mt-2 text-slate-400 font-bold">
+                                    <MapPin className="w-4 h-4 mr-2 text-amber-500" />
                                     {violation.location}
                                 </div>
                             </div>
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Time Registered</label>
-                                <div className="flex items-center mt-2 text-slate-600 font-bold">
-                                    <Calendar className="w-4 h-4 mr-2 text-amber-400" />
+                                <div className="flex items-center mt-2 text-slate-400 font-bold">
+                                    <Calendar className="w-4 h-4 mr-2 text-amber-500" />
                                     {new Date(violation.timestamp).toLocaleString()}
                                 </div>
                             </div>
@@ -297,15 +297,15 @@ const ViolationDetails = ({ id: propId, onClose }) => {
                     </div>
 
                     {/* Action Card */}
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden">
-                        <div className="p-6 bg-slate-50/20 border-b border-slate-200 backdrop-blur-md">
-                            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-[0.2em]">Resolution Bridge</h3>
+                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-slate-700/50 shadow-[0_0_20px_rgba(245,158,11,0.05)] overflow-hidden backdrop-blur-xl">
+                        <div className="p-6 bg-slate-800/30 border-b border-slate-700/50 backdrop-blur-md">
+                            <h3 className="font-bold text-white text-xs uppercase tracking-[0.2em]">Resolution Bridge</h3>
                         </div>
                         <div className="p-6 space-y-4">
                             <button 
                                 onClick={handleResolve}
                                 disabled={isResolving || violation.status === 'Resolved'}
-                                className={`w-full flex items-center justify-center px-6 py-4 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${violation.status === 'Resolved' ? 'bg-slate-50 text-slate-600 border border-slate-300 cursor-not-allowed' : 'bg-yellow-600 hover:bg-yellow-700 text-slate-900 shadow-xl shadow-yellow-500/20'}`}
+                                className={`w-full flex items-center justify-center px-6 py-4 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${violation.status === 'Resolved' ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700 text-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.3)]'}`}
                             >
                                 {isResolving ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>

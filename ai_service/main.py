@@ -106,9 +106,16 @@ async def stream_frames():
 
     cap = open_camera(CAMERA_SOURCE)
     
+    source_fps = 30
+    if cap and cap.isOpened():
+        prop_fps = cap.get(cv2.CAP_PROP_FPS)
+        if prop_fps > 0:
+            source_fps = prop_fps
+            print(f"Detected input source FPS: {source_fps}")
+            
     # Initialize recorder ONCE outside loop to maintain state across frames
     cam_id = BACKEND_WS_URL.rstrip('/').split('/')[-1]
-    recorder = SnapshotRecorder(camera_id=cam_id, fps=30)
+    recorder = SnapshotRecorder(camera_id=cam_id, fps=source_fps)
 
     # State for tracking violation persistence
     is_violation_active = False
@@ -130,6 +137,11 @@ async def stream_frames():
                          if not cap:
                              await asyncio.sleep(5)
                              continue
+                         else:
+                             prop_fps = cap.get(cv2.CAP_PROP_FPS)
+                             if prop_fps > 0:
+                                 source_fps = prop_fps
+                                 recorder.fps = source_fps
 
                     current_time = time.time()
                     if current_time - last_status_check > 2.0:
@@ -251,8 +263,19 @@ async def stream_frames():
                         last_fps_log = current_time
                         print(f"Streaming at {fps:.2f} FPS (Process time: {process_time*1000:.1f}ms per frame)")
 
-                    # Optimized for maximum hardware throughput
-                    await asyncio.sleep(0.001)
+                    # Match input video frame rate
+                    target_delay = 1.0 / source_fps if source_fps > 0 else 0.033
+                    sleep_time = target_delay - process_time
+                    
+                    if sleep_time > 0:
+                        await asyncio.sleep(sleep_time)
+                    else:
+                        # We are lagging. Skip frames to catch up to real-time simulation.
+                        if not CAMERA_SOURCE.isdigit():
+                            frames_to_skip = int(abs(sleep_time) / target_delay)
+                            for _ in range(frames_to_skip):
+                                cap.grab()
+                        await asyncio.sleep(0.001)
 
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError) as e:
             print(f"Connection lost or refused: {e}. Retrying in 5 seconds...")

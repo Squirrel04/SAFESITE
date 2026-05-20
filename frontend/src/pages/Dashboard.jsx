@@ -79,10 +79,10 @@ const Dashboard = () => {
                         <Shield className="w-8 h-8 text-slate-900 relative z-10" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
                             Safety Monitor
                         </h1>
-                        <p className="text-slate-500 mt-1 font-medium text-sm tracking-wide">Real-time surveillance and anomaly detection system.</p>
+                        <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Real-time surveillance and anomaly detection system.</p>
                     </div>
                 </div>
             </motion.div>
@@ -111,15 +111,15 @@ const Dashboard = () => {
                     transition={{ duration: 0.5, delay: 0.2 }}
                 >
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-slate-900 flex items-center tracking-tight">
-                            <Camera className="w-5 h-5 mr-3 text-amber-400" />
+                        <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
+                            <Camera className="w-5 h-5 mr-3 text-amber-500" />
                             Live Feeds
                         </h2>
-                        <button className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors font-semibold tracking-wide uppercase">View All</button>
+                        <button className="text-sm text-amber-500 hover:text-amber-400 transition-colors font-semibold tracking-wide uppercase">View All</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {cameras.map((cam) => (
-                            <div key={cam.id} className="bg-white/80 backdrop-blur-xl p-1.5 rounded-3xl border border-slate-200 shadow-xl overflow-hidden hover:border-slate-300 transition-colors">
+                            <div key={cam.id} className="bg-slate-900/40 backdrop-blur-xl p-1.5 rounded-3xl border border-slate-700/50 shadow-xl overflow-hidden hover:border-amber-500/30 transition-colors">
                                 <LiveCameraFeed {...cam} />
                             </div>
                         ))}
@@ -133,13 +133,13 @@ const Dashboard = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                    <h2 className="text-xl font-bold text-slate-900 flex items-center tracking-tight">
-                        <Activity className="w-5 h-5 mr-3 text-amber-400" />
+                    <h2 className="text-xl font-bold text-white flex items-center tracking-tight">
+                        <Activity className="w-5 h-5 mr-3 text-amber-500" />
                         Activity Trends
                     </h2>
-                    <div className="bg-white/80 backdrop-blur-xl border border-slate-200 rounded-3xl p-6 h-[400px] shadow-xl relative overflow-hidden group">
+                    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 h-[400px] shadow-xl relative overflow-hidden group">
                         {/* Background glow for chart */}
-                        <div className="hidden" />
+                        <div className="absolute -inset-20 bg-amber-500/5 blur-[100px] rounded-full pointer-events-none" />
                         
                         <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                             <AreaChart data={chartData}>
@@ -153,17 +153,17 @@ const Dashboard = () => {
                                         <stop offset="95%" stopColor="#facc15" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                <XAxis dataKey="time" stroke="#cbd5e1" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} dy={10} />
-                                <YAxis stroke="#cbd5e1" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} dx={-10} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                <XAxis dataKey="time" stroke="#94a3b8" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} dy={10} />
+                                <YAxis stroke="#94a3b8" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} dx={-10} />
                                 <Tooltip
                                     contentStyle={{ 
-                                        backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+                                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                                         backdropFilter: 'blur(12px)',
-                                        borderColor: '#e2e8f0', 
+                                        borderColor: '#334155', 
                                         borderRadius: '16px', 
-                                        color: '#0f172a',
-                                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                                        color: '#f8fafc',
+                                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.8)'
                                     }}
                                     itemStyle={{ color: '#e2e8f0', fontWeight: '500' }}
                                 />

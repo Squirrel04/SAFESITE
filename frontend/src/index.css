@@ -3,11 +3,12 @@
 @import "tailwindcss/utilities";
 
 body {
-    background-color: #ffffff; /* Pure white background */
-    color: #0f172a; /* slate-900 */
+    background-color: #020617; /* slate-950 */
+    color: #f1f5f9; /* slate-100 */
     margin: 0;
-    font-family: 'Satoshi', 'Inter', sans-serif;
+    font-family: 'Inter', 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes shine {
