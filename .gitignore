@@ -67,3 +67,8 @@ backend/seed_alerts.py
 # Local database
 data/
 
+# Native binaries and heavy media
+ai_service/*.dll
+ai_service/test.mp4
+
+

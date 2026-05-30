@@ -369,8 +369,14 @@ const TechnicalReview = () => {
                         { step: '11', title: 'Column Rebar & Concreting', status: 'Pending', color: 'slate' },
                         { step: '12', title: 'Beam and Slab Works', status: 'Pending', color: 'slate' }
                     ].map((item, i) => (
-                        <div key={i} className={`p-6 rounded-3xl border relative group transition-all duration-300 ${item.status === 'Active Monitoring' ? 'bg-amber-900/10 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : item.status === 'Completed' ? 'bg-emerald-900/10 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700/50 hover:border-slate-600'}`}>
-                            <div className="flex justify-between items-start mb-4">
+                        <div key={i} className={`p-6 rounded-3xl border relative group transition-all duration-300 overflow-hidden ${item.status === 'Active Monitoring' ? 'bg-amber-900/10 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : item.status === 'Completed' ? 'bg-emerald-900/10 border-emerald-500/30' : 'bg-slate-800/30 border-slate-700/50 hover:border-slate-600'}`}>
+                            {item.status === 'Active Monitoring' && (
+                                <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none mix-blend-screen overflow-hidden rounded-3xl">
+                                    <video src="/mp.mp4" autoPlay loop muted playsInline className="w-full h-full object-cover scale-150 grayscale sepia blur-[1px]" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+                                </div>
+                            )}
+                            <div className="flex justify-between items-start mb-4 relative z-10">
                                 <span className={`text-[10px] font-black font-mono tracking-widest uppercase ${item.status === 'Active Monitoring' ? 'text-amber-500' : item.status === 'Completed' ? 'text-emerald-500' : 'text-slate-500'}`}>
                                     Step {item.step}
                                 </span>
@@ -384,14 +390,19 @@ const TechnicalReview = () => {
                                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                                 )}
                             </div>
-                            <h3 className="text-sm font-bold text-white mb-2 leading-tight">{item.title}</h3>
-                            <div className={`mt-auto inline-flex px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider ${
+                            <h3 className="text-sm font-bold text-white mb-2 leading-tight relative z-10">{item.title}</h3>
+                            <div className={`mt-auto inline-flex px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider relative z-10 ${
                                 item.status === 'Active Monitoring' ? 'bg-amber-500/20 text-amber-400' : 
                                 item.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400' : 
                                 'bg-slate-700/50 text-slate-400'
                             }`}>
                                 {item.status}
                             </div>
+                            {item.status === 'Active Monitoring' && (
+                                <div className="absolute bottom-4 right-4 z-20 scale-75 origin-bottom-right">
+                                    <SittingWorker />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 const NotificationContext = createContext(null);
@@ -7,30 +7,34 @@ export const NotificationProvider = ({ children }) => {
     const [alerts, setAlerts] = useState([]);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const fetchAlerts = useCallback(async () => {
+        try {
+            const response = await api.get('/alerts/', { params: { limit: 100 } });
+            setAlerts(response.data);
+        } catch (err) {
+            console.error("Failed to fetch notifications:", err);
+        }
+    }, []);
+
     useEffect(() => {
-        const fetchInitialAlerts = async () => {
-            try {
-                const response = await api.get('/alerts/', { params: { limit: 10000 } });
-                setAlerts(response.data);
-            } catch (err) {
-                console.error("Failed to fetch initial notifications:", err);
-            }
-        };
+        // Fetch immediately on mount
+        fetchAlerts();
 
-        fetchInitialAlerts();
+        // Poll every 15 seconds for new alerts
+        const interval = setInterval(fetchAlerts, 15000);
 
+        // Also listen for live pushes via WebSocket
         const ws = new WebSocket('ws://localhost:8000/ws/notifications');
-        
+
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 const newAlert = {
                     ...data,
-                    id: data.id || Date.now() + Math.random().toString(36).substr(2, 9),
+                    id: data.id || data._id || Date.now() + Math.random().toString(36).substr(2, 9),
                     timestamp: data.timestamp || new Date().toISOString()
                 };
-                
-                // Add or update list, limit to 10000 for better persistence
+
                 setAlerts(prev => {
                     const index = prev.findIndex(a => a.id === newAlert.id || a._id === newAlert.id);
                     if (index >= 0) {
@@ -38,7 +42,7 @@ export const NotificationProvider = ({ children }) => {
                         next[index] = { ...next[index], ...newAlert };
                         return next;
                     }
-                    return [newAlert, ...prev].slice(0, 10000);
+                    return [newAlert, ...prev].slice(0, 100);
                 });
             } catch (err) {
                 console.error("Failed to parse notification:", err);
@@ -46,31 +50,33 @@ export const NotificationProvider = ({ children }) => {
         };
 
         ws.onerror = (err) => console.error("Notification WS Error:", err);
-        
-        // Background sync every 30 seconds
-        const interval = setInterval(fetchInitialAlerts, 30000);
-        
+
         return () => {
             ws.close();
             clearInterval(interval);
         };
-    }, []);
+    }, [fetchAlerts]);
 
-    const refreshAlerts = async () => {
+    const refreshAlerts = fetchAlerts;
+
+    const dismissAlert = (id) => {
+        setAlerts(prev => prev.filter(a => a.id !== id && a._id !== id));
+    };
+
+    const clearAllAlerts = async () => {
+        setIsDeleting(true);
         try {
-            const response = await api.get('/alerts/', { params: { limit: 10000 } });
-            setAlerts(response.data);
+            await api.post('/alerts/clear');
+            setAlerts([]);
         } catch (err) {
-            console.error("Failed to refresh notifications:", err);
+            console.error("Failed to clear alerts:", err);
+        } finally {
+            setIsDeleting(false);
         }
     };
 
-    const dismissAlert = (id) => {
-        setAlerts(prev => prev.filter(a => a.id !== id));
-    };
-
     return (
-        <NotificationContext.Provider value={{ alerts, dismissAlert, refreshAlerts, setAlerts, isDeleting, setIsDeleting }}>
+        <NotificationContext.Provider value={{ alerts, dismissAlert, refreshAlerts, setAlerts, isDeleting, setIsDeleting, clearAllAlerts }}>
             {children}
         </NotificationContext.Provider>
     );
@@ -83,4 +89,3 @@ export const useNotifications = () => {
     }
     return context;
 };
-

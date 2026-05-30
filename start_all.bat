@@ -1,18 +1,16 @@
 @echo off
-echo Starting SafeSite System...
+echo Starting SafeSite Services...
+
+echo Starting MongoDB...
+start "MongoDB" cmd /k ""C:\Program Files\MongoDB\Server\8.2\bin\mongod.exe" --dbpath "D:\safesite\data\db" --port 27017"
 
 echo Starting Backend...
-start "SafeSite Backend" cmd /k ".\start_backend.bat"
+start "Backend" cmd /k "cd /d D:\safesite\backend && venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000"
 
 echo Starting Frontend...
-start "SafeSite Frontend" cmd /k ".\start_frontend.bat"
+start "Frontend" cmd /k "cd /d D:\safesite\frontend && npm run dev"
 
-echo Starting AI Service...
-start "SafeSite AI Service" cmd /k ".\start_ai.bat"
+echo Starting AI Service (3 Cameras)...
+start "AI Cameras" cmd /k "cd /d D:\safesite\ai_service && venv\Scripts\python.exe run_all.py"
 
-echo Starting AI Service for Warehouse A...
-start "SafeSite AI Service Warehouse A" cmd /k ".\start_ai_warehouse_a.bat"
-
-echo All services started. 
-echo Backend: http://localhost:8000
-echo Frontend: http://localhost:5173
+echo All services launched! Check the new windows that opened.

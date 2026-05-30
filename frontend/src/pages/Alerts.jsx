@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle, Clock, Camera, Eye, X, Trash2, ShieldAlert 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '../context/NotificationContext';
 import ViolationDetails from './ViolationDetails';
+import { SittingWorker } from '../components/WalkingWorkers';
 
 const Alerts = () => {
     const navigate = useNavigate();
@@ -126,6 +127,10 @@ const Alerts = () => {
                         </h1>
                         <p className="text-slate-400 mt-1 font-medium text-sm tracking-wide">Secure historical record of safety violations.</p>
                     </div>
+                    {/* Sitting Worker on Evidence header */}
+                    <div className="relative hidden md:block">
+                        <SittingWorker />
+                    </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -149,6 +154,34 @@ const Alerts = () => {
                         <ShieldAlert className="w-4 h-4 mr-2 group-hover:text-amber-500 transition-colors" />
                         Clear All Log
                     </button>
+                </div>
+            </motion.div>
+
+            {/* Tiny Visual Telemetry Player Strip */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+                className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-amber-500/20 p-4 shadow-lg flex items-center justify-between overflow-hidden relative group"
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-[50px] pointer-events-none" />
+                <div className="flex items-center space-x-4">
+                    <div className="w-24 h-14 rounded-lg overflow-hidden border border-amber-500/40 relative bg-black shadow-md flex items-center justify-center shrink-0 group-hover:border-amber-500 transition-colors">
+                        <video src="/mp.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(245,158,11,0.05)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] pointer-events-none" />
+                        <div className="absolute w-full h-0.5 bg-amber-500/50 animate-[scanline_2s_linear_infinite]" />
+                        <span className="relative z-10 text-[6px] font-mono font-black text-amber-500 bg-black/60 px-1 py-0.5 rounded shadow">REC</span>
+                    </div>
+                    <div>
+                        <h3 className="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center">
+                            <Camera className="w-3.5 h-3.5 mr-1.5 text-amber-500" /> Auto-Capture Engine
+                        </h3>
+                        <p className="text-[10px] text-slate-400 mt-0.5 tracking-wide">High-fidelity 60FPS evidence syndication active on all zones.</p>
+                    </div>
+                </div>
+                <div className="hidden sm:flex items-center space-x-3 text-[10px] font-mono font-bold text-slate-500 tracking-wider">
+                    <span>BUFFER: <span className="text-amber-500">100%</span></span>
+                    <span>ENCODING: <span className="text-emerald-400">H264_AI</span></span>
                 </div>
             </motion.div>
 
@@ -234,6 +267,13 @@ const Alerts = () => {
                                                     <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border mt-0.5 inline-block ${getSeverityColor(alert.severity)}`}>
                                                         {alert.severity}
                                                     </span>
+                                                    
+                                                    {/* Hover micro-animation telemetry details */}
+                                                    <div className="mt-1 h-0 overflow-hidden group-hover:h-auto opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                        <span className="text-[8px] font-mono text-amber-500/80 bg-amber-500/10 px-1 py-0.5 rounded flex items-center w-fit">
+                                                            <div className="w-1 h-1 bg-amber-500 rounded-full mr-1 animate-ping" /> YOLO.v8_TRACKED
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

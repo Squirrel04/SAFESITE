@@ -13,7 +13,9 @@ const StandingSupervisor = () => {
         "System check: GPU temperatures within bounds.",
         "Live feeds are looking clear and secure.",
         "Grok Scout active on CAM-01.",
-        "Unauthorized zones clear of personnel."
+        "Evidence Log synced with high-fidelity telemetry.",
+        "Unauthorized zones clear of personnel.",
+        "Camera stream YOLO tracking is nominal."
     ];
 
     useEffect(() => {
